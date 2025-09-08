@@ -102,6 +102,7 @@ submitReceiptBtn.addEventListener('click', () => {
     const scriptURL = "https://script.google.com/macros/s/AKfycbzgoIXEOZopMWYDEJg8Uc_elZIvV-HC54ea_EPEo-wyeJmCWsApZa2JjmEVL6HF1zbX/exec"; // Certifique-se que sua URL está aqui
 
     uploadStatus.textContent = 'Enviando e confirmando...';
+    
     submitReceiptBtn.disabled = true;
 
     const reader = new FileReader();
