@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nosso Natal Mágico 2025</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header>
+        <div class="hero">
+            <h1>Nosso Natal Mágico 2025</h1>
+            <p>24 de Dezembro de 2025</p>
+        </div>
+    </header>
+
+    <main class="container">
+        <section id="intro">
+            <h2>Você é nosso convidado especial!</h2>
+            <p>
+                A época mais encantadora do ano está chegando e queremos celebrá-la ao lado das pessoas que mais amamos.
+                Para tornar nossa noite ainda mais memorável, sonhamos em realizar nossa festa em uma chácara especial.
+                Sua participação torna este sonho possível!
+            </p>
+        </section>
+
+        <section id="meta">
+            <h2>Nossa Meta em Conjunto</h2>
+            <p>Juntos, vamos alugar nosso cantinho de Natal!</p>
+            <div class="goal-details">
+                <p><strong>Valor total do aluguel:</strong> R$ 3.000,00</p>
+                <p><strong>Valor já garantido:</strong> R$ 1.000,00</p>
+                <p class="remaining"><strong>Faltam: R$ 2.000,00</strong></p>
+            </div>
+        </section>
+
+        <section id="contribuicao">
+            <h2>Faça parte deste sonho!</h2>
+            <p>Para nos ajudar a custear o aluguel, você pode contribuir de forma simples e rápida. Agradecemos de coração!</p>
+            <div class="pix-details">
+                <p><strong>Chave PIX (Celular):</strong> [SEU NÚMERO DE CELULAR]</p>
+                <p><strong>Nome do Titular:</strong> [SEU NOME COMPLETO]</p>
+                <p><strong>Instituição:</strong> [NOME DO SEU BANCO]</p>
+            </div>
+            <p class="comprovante-info">Após a transferência, por favor, encontre seu nome na lista abaixo e anexe o comprovante.</p>
+        </section>
+
+        <section id="confirmacao">
+            <h2>Lista de Confirmação e Pagamento</h2>
+            <p>Veja quem já confirmou e ajude-nos a completar nossa lista!</p>
+            <div id="guest-list-container">
+                </div>
+        </section>
+
+        <div id="uploadModal" class="modal">
+            <div class="modal-content">
+                <span class="close-button">&times;</span>
+                <h3>Enviar Comprovante</h3>
+                <p>Para: <strong id="guestName"></strong></p>
+                <input type="file" id="receiptFile" accept="image/*">
+                <button id="submitReceiptBtn">Enviar</button>
+                <p id="uploadStatus"></p>
+            </div>
+        </div>
+
+    </main>
+
+    <footer>
+        <p>Feito com carinho pelos organizadores!</p>
+    </footer>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+
+    <script src="script.js"></script>
+
+</body>
+</html>
