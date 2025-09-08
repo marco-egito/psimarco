@@ -90,20 +90,20 @@ window.onclick = (event) => { if (event.target == modal) { modal.style.display =
 
 // Cole esta nova versão da função no seu script.js
 
+// Substitua a função de envio de comprovante por esta
+
 submitReceiptBtn.addEventListener('click', () => {
     const file = receiptFile.files[0];
-    if (!file) {
-        uploadStatus.textContent = 'Por favor, selecione um arquivo.';
+    if (!file || !currentGuestDocId) {
+        uploadStatus.textContent = 'Erro: Arquivo ou convidado não selecionado.';
         return;
     }
 
-    // Cole a URL do seu App da Web do Google Apps Script aqui
-    const scriptURL = "https://script.google.com/macros/s/AKfycbzgoIXEOZopMWYDEJg8Uc_elZIvV-HC54ea_EPEo-wyeJmCWsApZa2JjmEVL6HF1zbX/exec";
+    const scriptURL = "https://script.google.com/macros/s/AKfycbzgoIXEOZopMWYDEJg8Uc_elZIvV-HC54ea_EPEo-wyeJmCWsApZa2JjmEVL6HF1zbX/exec"; // Certifique-se que sua URL está aqui
 
-    uploadStatus.textContent = 'Enviando...';
+    uploadStatus.textContent = 'Enviando e confirmando...';
     submitReceiptBtn.disabled = true;
 
-    // Usa o FileReader para converter a imagem para texto (base64)
     const reader = new FileReader();
     reader.readAsDataURL(file);
 
@@ -112,35 +112,31 @@ submitReceiptBtn.addEventListener('click', () => {
         const fileInfo = {
             fileName: file.name,
             fileType: file.type,
-            fileData: fileData // O arquivo convertido
+            fileData: fileData,
+            guestId: currentGuestDocId // <-- Enviando o ID do convidado!
         };
 
-        // Envia os dados para a nossa "ponte" (Google Apps Script)
         fetch(scriptURL, {
             method: 'POST',
-            mode: 'no-cors', // Importante para evitar erros de CORS com Apps Script
-            headers: {
-                'Content-Type': 'application/json'
-            },
             body: JSON.stringify(fileInfo)
         })
+        .then(res => res.json()) // Agora podemos ler a resposta!
         .then(response => {
-            // Como usamos 'no-cors', não conseguimos ler a resposta detalhada,
-            // mas um envio bem-sucedido já é suficiente.
-            uploadStatus.textContent = 'Comprovante enviado com sucesso!';
-
-            // Importante: Após o envio, você ainda precisa ir no Firebase e
-            // marcar manualmente o campo "confirmed" da pessoa como "true"
-            // para o card dela ficar verde.
-            setTimeout(() => {
-                modal.style.display = 'none';
-                submitReceiptBtn.disabled = false;
-            }, 2500);
-
+            if (response.status === "success") {
+                uploadStatus.textContent = 'Sucesso! Presença confirmada!';
+                // O site vai atualizar sozinho por causa do onSnapshot,
+                // mas fechamos o modal após um tempo.
+                setTimeout(() => {
+                    modal.style.display = 'none';
+                    submitReceiptBtn.disabled = false;
+                }, 2000);
+            } else {
+                throw new Error(response.message);
+            }
         })
         .catch(error => {
-            console.error('Erro ao enviar o arquivo:', error);
-            uploadStatus.textContent = 'Erro ao enviar. Tente novamente.';
+            console.error('Erro:', error);
+            uploadStatus.textContent = 'Erro ao confirmar. Tente novamente.';
             submitReceiptBtn.disabled = false;
         });
     };
