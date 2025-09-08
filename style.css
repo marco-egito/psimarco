@@ -171,3 +171,29 @@ footer { text-align: center; padding: 20px; margin-top: 30px; color: #666; }
         font-size: 1.2em;
     }
 }
+/* Adicione estas classes ao final do seu style.css */
+
+.guest-item.presence-confirmed {
+    background-color: #fff9c4; /* Amarelo claro */
+    border-left: 5px solid #fbc02d; /* Amarelo escuro */
+}
+
+/* Renomeando a classe .confirmed para .paid para ficar mais claro */
+.guest-item.paid {
+    background-color: #e8f5e9; /* Verde claro */
+    border-left: 5px solid var(--secondary-color);
+}
+
+.presence-btn {
+    background-color: #1976d2; /* Azul */
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9em;
+}
+
+.presence-btn:hover {
+    background-color: #1565c0;
+}
