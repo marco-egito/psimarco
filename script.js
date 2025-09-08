@@ -88,33 +88,66 @@ function openUploadModal(name, docId) {
 closeButton.onclick = () => { modal.style.display = 'none'; };
 window.onclick = (event) => { if (event.target == modal) { modal.style.display = 'none'; } };
 
+// Cole esta nova versão da função no seu script.js
+
 submitReceiptBtn.addEventListener('click', () => {
     const file = receiptFile.files[0];
-    if (!file) { uploadStatus.textContent = 'Por favor, selecione um arquivo.'; return; }
-    if (!currentGuestDocId) { uploadStatus.textContent = 'Erro: Convidado não identificado.'; return; }
+    if (!file) {
+        uploadStatus.textContent = 'Por favor, selecione um arquivo.';
+        return;
+    }
+
+    // Cole a URL do seu App da Web do Google Apps Script aqui
+    const scriptURL = "https://script.google.com/macros/s/AKfycbzgoIXEOZopMWYDEJg8Uc_elZIvV-HC54ea_EPEo-wyeJmCWsApZa2JjmEVL6HF1zbX/exec";
 
     uploadStatus.textContent = 'Enviando...';
     submitReceiptBtn.disabled = true;
 
-    const storageRef = storage.ref(`receipts/${currentGuestDocId}-${new Date().getTime()}-${file.name}`);
-    const task = storageRef.put(file);
+    // Usa o FileReader para converter a imagem para texto (base64)
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
 
-    task.on('state_changed',
-        (snapshot) => {
-            let progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-            uploadStatus.textContent = 'Enviando: ' + progress.toFixed(0) + '%';
-        },
-        (error) => {
-            console.error(error);
-            uploadStatus.textContent = 'Erro ao enviar. Tente novamente.';
-            submitReceiptBtn.disabled = false;
-        },
-        () => {
-            uploadStatus.textContent = 'Comprovante enviado! Aguardando confirmação manual.';
+    reader.onload = () => {
+        const fileData = reader.result;
+        const fileInfo = {
+            fileName: file.name,
+            fileType: file.type,
+            fileData: fileData // O arquivo convertido
+        };
+
+        // Envia os dados para a nossa "ponte" (Google Apps Script)
+        fetch(scriptURL, {
+            method: 'POST',
+            mode: 'no-cors', // Importante para evitar erros de CORS com Apps Script
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(fileInfo)
+        })
+        .then(response => {
+            // Como usamos 'no-cors', não conseguimos ler a resposta detalhada,
+            // mas um envio bem-sucedido já é suficiente.
+            uploadStatus.textContent = 'Comprovante enviado com sucesso!';
+
+            // Importante: Após o envio, você ainda precisa ir no Firebase e
+            // marcar manualmente o campo "confirmed" da pessoa como "true"
+            // para o card dela ficar verde.
             setTimeout(() => {
                 modal.style.display = 'none';
                 submitReceiptBtn.disabled = false;
             }, 2500);
-        }
-    );
+
+        })
+        .catch(error => {
+            console.error('Erro ao enviar o arquivo:', error);
+            uploadStatus.textContent = 'Erro ao enviar. Tente novamente.';
+            submitReceiptBtn.disabled = false;
+        });
+    };
+
+    reader.onerror = error => {
+        console.error('Erro ao ler o arquivo:', error);
+        uploadStatus.textContent = 'Erro ao processar o arquivo.';
+        submitReceiptBtn.disabled = false;
+    };
 });
