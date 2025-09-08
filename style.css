@@ -4,6 +4,7 @@
     --background-color: #f4f4f4;
     --text-color: #333;
     --card-bg-color: #ffffff;
+    --header-gradient: linear-gradient(45deg, #0d47a1, #1976d2); /* Gradiente azul */
 }
 
 body {
@@ -22,27 +23,35 @@ body {
 }
 
 header {
-    background-image: url('img/sua-imagem-de-natal.jpg'); /* COLOQUE UMA IMAGEM NA PASTA /img */
-    background-size: cover;
-    background-position: center;
+    background: var(--header-gradient);
     color: white;
     text-align: center;
-    padding: 4rem 1rem;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
+    padding: 3rem 1rem;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+}
+
+header h1 {
+    font-size: 2.8em;
+    margin-bottom: 0.2em;
 }
 
 section {
     background-color: var(--card-bg-color);
-    margin-bottom: 20px;
-    padding: 20px;
+    margin-bottom: 25px;
+    padding: 25px;
     border-radius: 8px;
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
+/* NOVO ESTILO UNIFICADO PARA OS TÍTULOS DE SEÇÃO */
 h2 {
-    color: var(--primary-color);
-    border-bottom: 2px solid var(--secondary-color);
-    padding-bottom: 10px;
+    background: var(--header-gradient);
+    color: white;
+    padding: 15px 20px;
+    margin: -25px -25px 20px -25px; /* Faz o título ocupar toda a largura do card */
+    border-radius: 8px 8px 0 0; /* Arredonda apenas os cantos superiores */
+    text-align: center;
+    font-size: 1.5em;
 }
 
 .goal-details .remaining {
@@ -74,16 +83,12 @@ h2 {
 }
 
 .guest-item.confirmed {
-    background-color: #e8f5e9; /* Verde claro */
+    background-color: #e8f5e9;
     border-left: 5px solid var(--secondary-color);
 }
 
-.guest-item span {
-    font-weight: bold;
-}
-
 .upload-btn {
-    background-color: var(--primary-color);
+    background-color: #d32f2f;
     color: white;
     border: none;
     padding: 8px 12px;
@@ -92,61 +97,77 @@ h2 {
     font-size: 0.9em;
 }
 
-.upload-btn:hover {
-    opacity: 0.9;
-}
+.upload-btn:hover { opacity: 0.9; }
 
-/* Estilos do Modal */
-.modal {
-    display: none;
-    position: fixed;
-    z-index: 1;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-    background-color: rgba(0,0,0,0.6);
-}
-
-.modal-content {
-    background-color: #fefefe;
-    margin: 15% auto;
-    padding: 20px;
-    border: 1px solid #888;
-    width: 80%;
-    max-width: 400px;
-    border-radius: 8px;
+/* ESTILOS PARA A NOVA SEÇÃO DA CHÁCARA */
+#chacara h3 {
     text-align: center;
+    color: var(--secondary-color);
+    font-size: 1.8em;
+    margin-top: 0;
 }
-
-.close-button {
-    color: #aaa;
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
+#chacara .location {
+    text-align: center;
+    font-style: italic;
+    color: #555;
+    margin-bottom: 25px;
 }
-
-.close-button:hover,
-.close-button:focus {
-    color: black;
-    text-decoration: none;
-    cursor: pointer;
+#chacara .details-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 25px;
+    margin-bottom: 25px;
 }
+#chacara ul {
+    list-style: none;
+    padding-left: 0;
+}
+#chacara li {
+    padding-left: 1.5em;
+    text-indent: -1.5em;
+    margin-bottom: 10px;
+}
+#chacara li::before {
+    content: '✓';
+    color: var(--secondary-color);
+    margin-right: 10px;
+}
+#chacara .warning { color: var(--primary-color); font-weight: bold; }
+#chacara .warning::before { content: '⚠️'; margin-right: 10px; }
 
-#submitReceiptBtn {
-    background-color: var(--secondary-color);
+#chacara .gallery-link {
+    display: block;
+    width: fit-content;
+    margin: 20px auto 0 auto;
+    background-color: #1a4a8a;
     color: white;
-    padding: 10px 20px;
-    border: none;
+    padding: 12px 25px;
     border-radius: 5px;
-    cursor: pointer;
-    margin-top: 15px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: background-color 0.3s;
 }
+#chacara .gallery-link:hover { background-color: #11335c; }
 
-footer {
-    text-align: center;
-    padding: 20px;
-    margin-top: 30px;
-    color: #666;
+
+/* Estilos do Modal (sem alteração) */
+.modal { display: none; position: fixed; z-index: 1; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.6); }
+.modal-content { background-color: #fefefe; margin: 15% auto; padding: 20px; border: 1px solid #888; width: 80%; max-width: 400px; border-radius: 8px; text-align: center; }
+.close-button { color: #aaa; float: right; font-size: 28px; font-weight: bold; }
+.close-button:hover, .close-button:focus { color: black; text-decoration: none; cursor: pointer; }
+#submitReceiptBtn { background-color: var(--secondary-color); color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; margin-top: 15px; }
+
+footer { text-align: center; padding: 20px; margin-top: 30px; color: #666; }
+
+/* Ajuste para telas menores */
+@media (max-width: 600px) {
+    #chacara .details-grid {
+        grid-template-columns: 1fr;
+    }
+    header h1 {
+        font-size: 2em;
+    }
+    h2 {
+        font-size: 1.2em;
+    }
 }
