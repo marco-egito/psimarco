@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin - Populador de Banco de Dados</title>
+    <style>
+        body { font-family: sans-serif; text-align: center; margin-top: 50px; }
+        button { font-size: 1.2em; padding: 15px 30px; cursor: pointer; }
+        #status { margin-top: 20px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <h1>Administração da Festa de Natal</h1>
+    <p>Use este botão para adicionar a lista inicial de convidados ao banco de dados do Firebase.</p>
+    <p><strong>Atenção:</strong> Execute isso apenas uma vez!</p>
+    
+    <button id="populateDbBtn">Adicionar Convidados ao Banco de Dados</button>
+
+    <div id="status"></div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+    <script src="admin.js"></script>
+
+</body>
+</html>
