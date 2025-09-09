@@ -106,9 +106,10 @@ document.getElementById('addGuestForm').addEventListener('submit', e => {
         .then(res => res.json()).then(res => {
             if (res.status === "success") { statusEl.textContent = res.message; e.target.reset(); } 
             else { throw new Error(res.message); }
-        }).catch(err => statusEl.textContent = 'Erro ao adicionar.').finally(() => {
-            btn.disabled = false; setTimeout(() => { statusEl.textContent = ''; }, 3000);
-        });
+                .catch(err => {
+                console.error(err);
+                statusEl.textContent = 'Erro: ' + err.message;
+})
 });
 
 document.getElementById('submitReceiptBtn').addEventListener('click', () => {
