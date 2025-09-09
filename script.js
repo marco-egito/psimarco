@@ -12,99 +12,159 @@ const firebaseConfig = {
 // Inicializa o Firebase
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
-const storage = firebase.storage();
 
+// --- ELEMENTOS GLOBAIS ---
 const guestListContainer = document.getElementById('guest-list-container');
 const guestsCollection = db.collection('guests');
+const modal = document.getElementById('uploadModal');
+const submitReceiptBtn = document.getElementById('submitReceiptBtn');
 
-// --- LÓGICA DA LISTA DE CONVIDADOS ---
-const renderGuestList = (doc) => {
+
+// --- LÓGICA PRINCIPAL EM TEMPO REAL ---
+guestsCollection.orderBy('id').onSnapshot(snapshot => {
+    guestListContainer.innerHTML = ''; // Limpa a lista antes de renderizar
+    
+    // --- LÓGICA DE CÁLCULO DO VALOR POR PESSOA ---
+    const valorTotal = 3000;
+    const costPerPersonElement = document.getElementById('cost-per-person');
+
+    // Filtra para encontrar apenas os adultos que confirmaram PRESENÇA (fundo amarelo ou verde)
+    const adultosQueConfirmaramPresenca = snapshot.docs.filter(doc => {
+        const guest = doc.data();
+        // Garante que isChild não seja indefinido e que seja falso
+        return guest.presence_confirmed === true && (guest.isChild === false || guest.isChild === undefined);
+    });
+
+    const numeroDePagantes = adultosQueConfirmaramPresenca.length;
+
+    if (numeroDePagantes > 0) {
+        const valorPorPessoa = valorTotal / numeroDePagantes;
+        const valorFormatado = valorPorPessoa.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        costPerPersonElement.innerHTML = `Valor por pessoa (adulto): <strong>${valorFormatado}</strong> (${numeroDePagantes} pagantes)`;
+    } else {
+        costPerPersonElement.innerHTML = "Aguardando confirmações de presença para calcular o valor...";
+    }
+    // --- FIM DA LÓGICA DE CÁLCULO ---
+
+    // Renderiza cada convidado na lista
+    snapshot.docs.forEach(doc => renderGuest(doc));
+});
+
+
+// --- FUNÇÃO PARA RENDERIZAR CADA CONVIDADO ---
+function renderGuest(doc) {
     const guest = doc.data();
     const guestItem = document.createElement('div');
     guestItem.classList.add('guest-item');
     guestItem.setAttribute('data-id', doc.id);
 
+    const guestInfo = document.createElement('div');
+    guestInfo.classList.add('guest-info');
+    
     const guestName = document.createElement('span');
     guestName.textContent = `${guest.id} - ${guest.name}`;
-    guestItem.appendChild(guestName);
+    guestInfo.appendChild(guestName);
 
-    // Estado 1: Pagamento Confirmado (Verde)
-    if (guest.confirmed) {
+    // --- LÓGICA DO CHECKBOX EDITÁVEL ---
+    const childCheckboxContainer = document.createElement('div');
+    childCheckboxContainer.classList.add('editable-checkbox');
+
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.id = `child_${doc.id}`;
+    checkbox.checked = guest.isChild === true;
+    
+    checkbox.addEventListener('change', () => {
+        guestsCollection.doc(doc.id).update({ isChild: checkbox.checked });
+    });
+
+    const label = document.createElement('label');
+    label.htmlFor = `child_${doc.id}`;
+    label.textContent = 'É criança?';
+    
+    childCheckboxContainer.appendChild(checkbox);
+    childCheckboxContainer.appendChild(label);
+    guestInfo.appendChild(childCheckboxContainer);
+    // --- FIM DA LÓGICA DO CHECKBOX ---
+
+    guestItem.appendChild(guestInfo);
+
+    if (guest.amountPaid > 0) {
         guestItem.classList.add('paid');
-        const checkmark = document.createElement('span');
-        checkmark.innerHTML = '✅ Pagamento Confirmado';
-        guestItem.appendChild(checkmark);
+        const paidInfo = document.createElement('span');
+        const valorPagoFormatado = guest.amountPaid.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        paidInfo.innerHTML = `✅ ${valorPagoFormatado}`;
+        guestItem.appendChild(paidInfo);
     } 
-    // Estado 2: Presença Confirmada, aguardando pagamento (Amarelo)
     else if (guest.presence_confirmed) {
         guestItem.classList.add('presence-confirmed');
-        const uploadButton = document.createElement('button');
-        uploadButton.textContent = 'Enviar Comprovante';
-        uploadButton.classList.add('upload-btn');
-        uploadButton.addEventListener('click', () => openUploadModal(guest.name, doc.id));
+        const uploadButton = createButton('Enviar Comprovante', 'upload-btn', () => openUploadModal(guest.name, doc.id));
         guestItem.appendChild(uploadButton);
     } 
-    // Estado 3: Ainda não confirmou a presença (Branco)
     else {
-        const confirmButton = document.createElement('button');
-        confirmButton.textContent = 'Confirmar Presença';
-        confirmButton.classList.add('presence-btn');
-        confirmButton.addEventListener('click', () => {
-            // Atualiza o documento no Firestore
+        const confirmButton = createButton('Confirmar Presença', 'presence-btn', () => {
             guestsCollection.doc(doc.id).update({ presence_confirmed: true });
         });
         guestItem.appendChild(confirmButton);
     }
-
     guestListContainer.appendChild(guestItem);
-};
+}
 
-// Escuta por mudanças na coleção de convidados em tempo real
-guestsCollection.orderBy('id').onSnapshot(snapshot => {
-    guestListContainer.innerHTML = ''; // Limpa a lista antes de renderizar
+// Função auxiliar para criar botões
+function createButton(text, className, onClick) {
+    const button = document.createElement('button');
+    button.textContent = text;
+    button.className = className;
+    button.addEventListener('click', onClick);
+    return button;
+}
 
-    // --- INÍCIO DA LÓGICA DE CÁLCULO DO VALOR POR PESSOA ---
-    const valorTotal = 3000;
-    const costPerPersonElement = document.getElementById('cost-per-person');
+// --- LÓGICA DO FORMULÁRIO DE ADICIONAR CONVIDADO ---
+const addGuestForm = document.getElementById('addGuestForm');
+addGuestForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const newGuestNameInput = document.getElementById('newGuestName');
+    const newGuestIsChildCheckbox = document.getElementById('newGuestIsChild');
+    const addGuestBtn = document.getElementById('addGuestBtn');
+    const addGuestStatus = document.getElementById('addGuestStatus');
+    const guestName = newGuestNameInput.value.trim();
+    if (!guestName) return;
 
-    // 1. Filtra para encontrar apenas os adultos confirmados
-    const adultosConfirmados = snapshot.docs.filter(doc => {
-        const guest = doc.data();
-        return guest.confirmed === true && guest.isChild === false;
-    });
+    addGuestBtn.disabled = true;
+    addGuestStatus.textContent = "Adicionando...";
 
-    // 2. Conta quantos são
-    const numeroDePagantes = adultosConfirmados.length;
+    // ATENÇÃO: COLOQUE A URL DO SEU APP DA WEB AQUI
+    const scriptURL = "URL_DO_SEU_APP_DA_WEB_AQUI";
+    const payload = {
+        action: 'addGuest',
+        name: guestName,
+        isChild: newGuestIsChildCheckbox.checked
+    };
 
-    // 3. Calcula o valor e exibe na tela
-    if (numeroDePagantes > 0) {
-        const valorPorPessoa = valorTotal / numeroDePagantes;
-        // Formata o valor como moeda brasileira (R$ XX,XX)
-        const valorFormatado = valorPorPessoa.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-        costPerPersonElement.innerHTML = `🎉 Valor por pessoa (adulto): <strong>${valorFormatado}</strong>`;
-    } else {
-        costPerPersonElement.innerHTML = "Aguardando confirmações para calcular o valor por pessoa...";
-    }
-    // --- FIM DA LÓGICA DE CÁLCULO ---
-
-
-    // Renderiza a lista de convidados (lógica que já existia)
-    snapshot.docs.forEach(doc => {
-        renderGuestList(doc);
-    });
+    fetch(scriptURL, { method: 'POST', body: JSON.stringify(payload) })
+        .then(res => res.json())
+        .then(response => {
+            if (response.status === "success") {
+                addGuestStatus.textContent = response.message;
+                addGuestForm.reset();
+            } else { throw new Error(response.message); }
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+            addGuestStatus.textContent = 'Erro ao adicionar. Tente novamente.';
+        })
+        .finally(() => {
+            addGuestBtn.disabled = false;
+            setTimeout(() => { addGuestStatus.textContent = ''; }, 3000);
+        });
 });
 
-// --- LÓGICA DO MODAL DE UPLOAD (sem alterações) ---
-// ... (o código do modal continua o mesmo de antes) ...
-const modal = document.getElementById('uploadModal');
-const guestNameEl = document.getElementById('guestName');
-const closeButton = document.querySelector('.close-button');
-const submitReceiptBtn = document.getElementById('submitReceiptBtn');
-const receiptFile = document.getElementById('receiptFile');
-const uploadStatus = document.getElementById('uploadStatus');
+// --- LÓGICA DO MODAL E UPLOAD DE COMPROVANTE ---
 let currentGuestDocId = null;
-
 function openUploadModal(name, docId) {
+    const guestNameEl = document.getElementById('guestName');
+    const uploadStatus = document.getElementById('uploadStatus');
+    const receiptFile = document.getElementById('receiptFile');
     guestNameEl.textContent = name;
     currentGuestDocId = docId;
     uploadStatus.textContent = '';
@@ -112,66 +172,38 @@ function openUploadModal(name, docId) {
     modal.style.display = 'block';
 }
 
+const closeButton = document.querySelector('.close-button');
 closeButton.onclick = () => { modal.style.display = 'none'; };
 window.onclick = (event) => { if (event.target == modal) { modal.style.display = 'none'; } };
 
-// Cole esta nova versão da função no seu script.js
-
-// Substitua a função de envio de comprovante por esta
-
 submitReceiptBtn.addEventListener('click', () => {
+    const receiptFile = document.getElementById('receiptFile');
+    const uploadStatus = document.getElementById('uploadStatus');
     const file = receiptFile.files[0];
-    if (!file || !currentGuestDocId) {
-        uploadStatus.textContent = 'Erro: Arquivo ou convidado não selecionado.';
-        return;
-    }
+    if (!file || !currentGuestDocId) { return; }
 
-    const scriptURL = "https://script.google.com/macros/s/AKfycbzgoIXEOZopMWYDEJg8Uc_elZIvV-HC54ea_EPEo-wyeJmCWsApZa2JjmEVL6HF1zbX/exec"; // Certifique-se que sua URL está aqui
-
-    uploadStatus.textContent = 'Enviando e confirmando...';
-
+    // ATENÇÃO: COLOQUE A URL DO SEU APP DA WEB AQUI
+    const scriptURL = "URL_DO_SEU_APP_DA_WEB_AQUI"; 
+    uploadStatus.textContent = 'Enviando...';
     submitReceiptBtn.disabled = true;
 
     const reader = new FileReader();
     reader.readAsDataURL(file);
-
     reader.onload = () => {
-        const fileData = reader.result;
-        const fileInfo = {
+        const payload = {
+            action: 'uploadReceipt',
+            fileData: reader.result,
             fileName: file.name,
             fileType: file.type,
-            fileData: fileData,
-            guestId: currentGuestDocId // <-- Enviando o ID do convidado!
+            guestId: currentGuestDocId
         };
-
-        fetch(scriptURL, {
-            method: 'POST',
-            body: JSON.stringify(fileInfo)
-        })
-        .then(res => res.json()) // Agora podemos ler a resposta!
-        .then(response => {
-            if (response.status === "success") {
-                uploadStatus.textContent = 'Sucesso! Presença confirmada!';
-                // O site vai atualizar sozinho por causa do onSnapshot,
-                // mas fechamos o modal após um tempo.
-                setTimeout(() => {
-                    modal.style.display = 'none';
-                    submitReceiptBtn.disabled = false;
-                }, 2000);
-            } else {
-                throw new Error(response.message);
-            }
-        })
-        .catch(error => {
-            console.error('Erro:', error);
-            uploadStatus.textContent = 'Erro ao confirmar. Tente novamente.';
-            submitReceiptBtn.disabled = false;
-        });
-    };
-
-    reader.onerror = error => {
-        console.error('Erro ao ler o arquivo:', error);
-        uploadStatus.textContent = 'Erro ao processar o arquivo.';
-        submitReceiptBtn.disabled = false;
+        fetch(scriptURL, { method: 'POST', body: JSON.stringify(payload) })
+            .then(res => res.json())
+            .then(response => {
+                uploadStatus.textContent = response.message;
+                setTimeout(() => { modal.style.display = 'none'; }, 2500);
+            })
+            .catch(error => { uploadStatus.textContent = 'Erro ao enviar.'; })
+            .finally(() => { submitReceiptBtn.disabled = false; });
     };
 });
