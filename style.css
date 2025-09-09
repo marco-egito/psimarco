@@ -53,22 +53,43 @@ h2 {
     font-size: 1.5em;
 }
 
+/* --- ESTILOS ATUALIZADOS PARA META E RATEIO --- */
 .goal-details .remaining {
     color: var(--primary-color);
     font-size: 1.2em;
     font-weight: bold;
 }
 
-.pix-details {
-    background-color: #e9e9e9;
-    padding: 15px;
-    border-radius: 5px;
-    border-left: 5px solid var(--secondary-color);
+.cost-split {
+    display: flex;
+    gap: 20px;
+    margin-top: 20px;
 }
+
+.cost-share {
+    flex: 1;
+    padding: 15px;
+    font-size: 1.1em;
+    font-weight: 500;
+    text-align: center;
+    border-radius: 5px;
+}
+
+.cost-share.entry {
+    background-color: #e3f2fd; /* Azul claro */
+    border-left: 5px solid #1976d2; /* Azul principal */
+}
+
+.cost-share.final {
+    background-color: #e8f5e9; /* Verde claro */
+    border-left: 5px solid var(--secondary-color); /* Verde principal */
+}
+/* --- FIM DOS ESTILOS DE META E RATEIO --- */
+
 
 #guest-list-container {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 15px;
 }
 
@@ -76,32 +97,20 @@ h2 {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px;
+    padding: 10px 15px;
     border: 1px solid #ddd;
     border-radius: 5px;
 }
 
-.guest-item.paid {
+.guest-item.paid { /* Usado para quem pagou TUDO */
     background-color: #e8f5e9;
     border-left: 5px solid var(--secondary-color);
 }
 
-.guest-item.presence-confirmed {
-    background-color: #fff9c4;
+.guest-item.presence-confirmed { /* Usado para quem só confirmou presença */
+    background-color: #fffde7; /* Amarelo bem claro */
     border-left: 5px solid #fbc02d;
 }
-
-.upload-btn {
-    background-color: #d32f2f;
-    color: white;
-    border: none;
-    padding: 8px 12px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 0.9em;
-}
-
-.upload-btn:hover { opacity: 0.9; }
 
 .presence-btn {
     background-color: #1976d2;
@@ -128,26 +137,17 @@ h2 {
 #chacara .gallery-link { display: block; width: fit-content; margin: 20px auto 0 auto; background-color: #1a4a8a; color: white; padding: 12px 25px; border-radius: 5px; text-decoration: none; font-weight: bold; transition: background-color 0.3s; }
 #chacara .gallery-link:hover { background-color: #11335c; }
 
-.modal { display: none; position: fixed; z-index: 1; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.6); }
-.modal-content { background-color: #fefefe; margin: 15% auto; padding: 20px; border: 1px solid #888; width: 80%; max-width: 400px; border-radius: 8px; text-align: center; }
-.close-button { color: #aaa; float: right; font-size: 28px; font-weight: bold; }
-.close-button:hover, .close-button:focus { color: black; text-decoration: none; cursor: pointer; }
-#submitReceiptBtn { background-color: var(--secondary-color); color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; margin-top: 15px; }
-
 footer { text-align: center; padding: 20px; margin-top: 30px; color: #666; }
 
-.admin-contact { font-size: 0.9em; text-align: center; background-color: #eef; padding: 10px; border-radius: 5px; }
+.admin-contact {
+    font-size: 0.9em;
+    text-align: center;
+    background-color: #eef;
+    padding: 15px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+}
 
-.cost-share { margin-top: 20px; padding: 15px; background-color: #e3f2fd; border-left: 5px solid #1976d2; font-size: 1.1em; font-weight: 500; text-align: center; }
-
-#addGuestForm { display: flex; flex-direction: column; gap: 15px; }
-#addGuestForm input[type="text"] { padding: 12px; font-size: 1em; border: 1px solid #ccc; border-radius: 5px; }
-#addGuestForm .is-child-checkbox { display: flex; align-items: center; gap: 10px; }
-#addGuestForm button { background-color: var(--secondary-color); color: white; padding: 12px; font-size: 1.1em; border: none; border-radius: 5px; cursor: pointer; transition: background-color 0.3s; }
-#addGuestForm button:hover { background-color: #145a14; }
-#addGuestStatus { text-align: center; font-weight: bold; min-height: 20px; }
-
-/* --- ESTILOS PARA O CHECKBOX EDITÁVEL NA LISTA --- */
 .guest-info {
     display: flex;
     flex-direction: column;
@@ -168,115 +168,48 @@ footer { text-align: center; padding: 20px; margin-top: 30px; color: #666; }
     cursor: pointer;
 }
 
-.child-indicator {
-    display: none;
+/* --- NOVOS ESTILOS PARA CHECKBOXES DE PAGAMENTO --- */
+.payment-checkboxes {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 8px;
 }
+
+.payment-option {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.payment-option label {
+    margin-left: 8px;
+    font-size: 0.9em;
+    color: #333;
+    cursor: pointer;
+}
+/* --- FIM DOS ESTILOS DE PAGAMENTO --- */
+
+#poll-section { text-align: center; }
+#poll-options { display: flex; justify-content: center; gap: 15px; margin: 25px 0; }
+#poll-options button { padding: 12px 20px; font-size: 1em; border: none; border-radius: 5px; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; font-weight: bold; }
+#poll-options button:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.15); }
+#vote-monthly-btn { background-color: #1e88e5; color: white; }
+#vote-on-the-day-btn { background-color: #ffb300; color: #333; }
+#poll-options button:disabled { background-color: #bdbdbd; cursor: not-allowed; transform: none; box-shadow: none; }
+#poll-results { margin-top: 30px; text-align: left; }
+#poll-results h4 { text-align: center; margin-bottom: 20px; font-size: 1.2em; }
+.result-bar-container { width: 100%; background-color: #e0e0e0; border-radius: 8px; position: relative; height: 30px; margin-top: 5px; }
+.result-bar { height: 100%; border-radius: 8px; width: 0%; transition: width 0.5s ease-in-out; }
+.result-bar.monthly { background-color: #1e88e5; }
+.result-bar.on-the-day { background-color: #ffb300; }
+.votes-text { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: white; font-weight: bold; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); }
+.option-label { margin-top: 5px; margin-bottom: 20px; font-size: 0.9em; color: #555; }
+#poll-status { margin-top: 20px; font-weight: bold; min-height: 20px; text-align: center; }
 
 @media (max-width: 600px) {
     #chacara .details-grid { grid-template-columns: 1fr; }
     header h1 { font-size: 2em; }
     h2 { font-size: 1.2em; }
-}
-/* --- ESTILOS PARA A SEÇÃO DA ENQUETE --- */
-
-#poll-section {
-    text-align: center;
-}
-
-#poll-options {
-    display: flex;
-    justify-content: center;
-    gap: 15px;
-    margin: 25px 0;
-}
-
-#poll-options button {
-    padding: 12px 20px;
-    font-size: 1em;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s;
-    font-weight: bold;
-}
-
-#poll-options button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-}
-
-#vote-monthly-btn {
-    background-color: #1e88e5; /* Azul */
-    color: white;
-}
-
-#vote-on-the-day-btn {
-    background-color: #ffb300; /* Âmbar */
-    color: #333;
-}
-
-#poll-options button:disabled {
-    background-color: #bdbdbd;
-    cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
-}
-
-#poll-results {
-    margin-top: 30px;
-    text-align: left;
-}
-
-#poll-results h4 {
-    text-align: center;
-    margin-bottom: 20px;
-    font-size: 1.2em;
-}
-
-.result-bar-container {
-    width: 100%;
-    background-color: #e0e0e0;
-    border-radius: 8px;
-    position: relative;
-    height: 30px;
-    margin-top: 5px;
-}
-
-.result-bar {
-    height: 100%;
-    border-radius: 8px;
-    width: 0%; /* Começa com 0 e será atualizado via JS */
-    transition: width 0.5s ease-in-out;
-}
-
-.result-bar.monthly {
-    background-color: #1e88e5; /* Azul */
-}
-
-.result-bar.on-the-day {
-    background-color: #ffb300; /* Âmbar */
-}
-
-.votes-text {
-    position: absolute;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: white;
-    font-weight: bold;
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
-}
-
-.option-label {
-    margin-top: 5px;
-    margin-bottom: 20px;
-    font-size: 0.9em;
-    color: #555;
-}
-
-#poll-status {
-    margin-top: 20px;
-    font-weight: bold;
-    min-height: 20px;
-    text-align: center;
+    .cost-split { flex-direction: column; }
 }
