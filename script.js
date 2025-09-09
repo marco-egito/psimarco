@@ -21,28 +21,30 @@ const submitReceiptBtn = document.getElementById('submitReceiptBtn');
 
 
 // --- LÓGICA PRINCIPAL EM TEMPO REAL ---
-guestsCollection.orderBy('id').onSnapshot(snapshot => {
+// ALTERAÇÃO AQUI: orderBy('name') para ordenar em ordem alfabética
+guestsCollection.orderBy('name').onSnapshot(snapshot => {
     guestListContainer.innerHTML = ''; // Limpa a lista antes de renderizar
     
     // --- LÓGICA DE CÁLCULO DO VALOR POR PESSOA ---
     const valorTotal = 3000;
     const costPerPersonElement = document.getElementById('cost-per-person');
 
-    // Filtra para encontrar apenas os adultos que confirmaram PRESENÇA (fundo amarelo ou verde)
-    const adultosQueConfirmaramPresenca = snapshot.docs.filter(doc => {
+    // Filtra para encontrar apenas os adultos pagantes que confirmaram presença
+    const adultosPagantes = snapshot.docs.filter(doc => {
         const guest = doc.data();
-        // Garante que isChild não seja indefinido e que seja falso
-        return guest.presence_confirmed === true && (guest.isChild === false || guest.isChild === undefined);
+        return guest.presence_confirmed === true && 
+               !guest.isChild &&
+               (guest.isPaying === undefined || guest.isPaying === true);
     });
 
-    const numeroDePagantes = adultosQueConfirmaramPresenca.length;
+    const numeroDePagantes = adultosPagantes.length;
 
     if (numeroDePagantes > 0) {
         const valorPorPessoa = valorTotal / numeroDePagantes;
         const valorFormatado = valorPorPessoa.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
         costPerPersonElement.innerHTML = `Valor por pessoa (adulto): <strong>${valorFormatado}</strong> (${numeroDePagantes} pagantes)`;
     } else {
-        costPerPersonElement.innerHTML = "Aguardando confirmações de presença para calcular o valor...";
+        costPerPersonElement.innerHTML = "Aguardando confirmações de pagantes para calcular o valor...";
     }
     // --- FIM DA LÓGICA DE CÁLCULO ---
 
@@ -62,7 +64,8 @@ function renderGuest(doc) {
     guestInfo.classList.add('guest-info');
     
     const guestName = document.createElement('span');
-    guestName.textContent = `${guest.id} - ${guest.name}`;
+    // Remove o número 'id' do início do nome para uma lista mais limpa
+    guestName.textContent = guest.name; 
     guestInfo.appendChild(guestName);
 
     // --- LÓGICA DO CHECKBOX EDITÁVEL ---
@@ -183,7 +186,7 @@ submitReceiptBtn.addEventListener('click', () => {
     if (!file || !currentGuestDocId) { return; }
 
     // ATENÇÃO: COLOQUE A URL DO SEU APP DA WEB AQUI
-    const scriptURL = "URL_DO_SEU_APP_DA_WEB_AQUI"; 
+    const scriptURL = "https://script.google.com/macros/s/AKfycbzgoIXEOZopMWYDEJg8Uc_elZIvV-HC54ea_EPEo-wyeJmCWsApZa2JjmEVL6HF1zbX/exec"; 
     uploadStatus.textContent = 'Enviando...';
     submitReceiptBtn.disabled = true;
 
