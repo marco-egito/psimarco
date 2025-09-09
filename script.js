@@ -62,6 +62,33 @@ const renderGuestList = (doc) => {
 // Escuta por mudanças na coleção de convidados em tempo real
 guestsCollection.orderBy('id').onSnapshot(snapshot => {
     guestListContainer.innerHTML = ''; // Limpa a lista antes de renderizar
+
+    // --- INÍCIO DA LÓGICA DE CÁLCULO DO VALOR POR PESSOA ---
+    const valorTotal = 3000;
+    const costPerPersonElement = document.getElementById('cost-per-person');
+
+    // 1. Filtra para encontrar apenas os adultos confirmados
+    const adultosConfirmados = snapshot.docs.filter(doc => {
+        const guest = doc.data();
+        return guest.confirmed === true && guest.isChild === false;
+    });
+
+    // 2. Conta quantos são
+    const numeroDePagantes = adultosConfirmados.length;
+
+    // 3. Calcula o valor e exibe na tela
+    if (numeroDePagantes > 0) {
+        const valorPorPessoa = valorTotal / numeroDePagantes;
+        // Formata o valor como moeda brasileira (R$ XX,XX)
+        const valorFormatado = valorPorPessoa.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        costPerPersonElement.innerHTML = `🎉 Valor por pessoa (adulto): <strong>${valorFormatado}</strong>`;
+    } else {
+        costPerPersonElement.innerHTML = "Aguardando confirmações para calcular o valor por pessoa...";
+    }
+    // --- FIM DA LÓGICA DE CÁLCULO ---
+
+
+    // Renderiza a lista de convidados (lógica que já existia)
     snapshot.docs.forEach(doc => {
         renderGuestList(doc);
     });
@@ -102,7 +129,7 @@ submitReceiptBtn.addEventListener('click', () => {
     const scriptURL = "https://script.google.com/macros/s/AKfycbzgoIXEOZopMWYDEJg8Uc_elZIvV-HC54ea_EPEo-wyeJmCWsApZa2JjmEVL6HF1zbX/exec"; // Certifique-se que sua URL está aqui
 
     uploadStatus.textContent = 'Enviando e confirmando...';
-    
+
     submitReceiptBtn.disabled = true;
 
     const reader = new FileReader();
