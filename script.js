@@ -1,3 +1,24 @@
+// ATENÇÃO: Cole aqui a configuração do seu projeto Firebase
+const firebaseConfig = {
+  apiKey: "AIzaSyAjgzXuxHtOO32rzLGCmgOVN5gV8OzeImE",
+  authDomain: "natal2025-4b00f.firebaseapp.com",
+  projectId: "natal2025-4b00f",
+  storageBucket: "natal2025-4b00f.firebasestorage.app",
+  messagingSenderId: "1011045410547",
+  appId: "1:1011045410547:web:10305de407f87442f17986",
+  measurementId: "G-YCPLK7YY9B"
+};
+
+// ATENÇÃO: COLOQUE A CONFIGURAÇÃO DO SEU PROJETO FIREBASE AQUI
+const firebaseConfig = {
+    apiKey: "SUA_API_KEY",
+    authDomain: "SEU_AUTH_DOMAIN",
+    projectId: "SEU_PROJECT_ID",
+    storageBucket: "SEU_STORAGE_BUCKET",
+    messagingSenderId: "SEU_MESSAGING_SENDER_ID",
+    appId: "SEU_APP_ID"
+};
+
 // Inicializa o Firebase
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
