@@ -21,30 +21,32 @@ const submitReceiptBtn = document.getElementById('submitReceiptBtn');
 
 
 // --- LÓGICA PRINCIPAL EM TEMPO REAL ---
-// ALTERAÇÃO AQUI: orderBy('name') para ordenar em ordem alfabética
 guestsCollection.orderBy('name').onSnapshot(snapshot => {
     guestListContainer.innerHTML = ''; // Limpa a lista antes de renderizar
     
-    // --- LÓGICA DE CÁLCULO DO VALOR POR PESSOA ---
-    const valorTotal = 3000;
+    // --- LÓGICA DE CÁLCULO ATUALIZADA (NOVAS REGRAS) ---
+    const valorRestante = 2000; // O cálculo agora é sobre o valor que falta
     const costPerPersonElement = document.getElementById('cost-per-person');
 
-    // Filtra para encontrar apenas os adultos pagantes que confirmaram presença
-    const adultosPagantes = snapshot.docs.filter(doc => {
+    // 1. Filtra para encontrar todos os adultos que confirmaram presença
+    const adultosConfirmados = snapshot.docs.filter(doc => {
         const guest = doc.data();
-        return guest.presence_confirmed === true && 
-               !guest.isChild &&
-               (guest.isPaying === undefined || guest.isPaying === true);
+        return guest.presence_confirmed === true && !guest.isChild;
     });
 
-    const numeroDePagantes = adultosPagantes.length;
+    // 2. Pega o número total de adultos confirmados
+    const numeroDePagantesBruto = adultosConfirmados.length;
 
-    if (numeroDePagantes > 0) {
-        const valorPorPessoa = valorTotal / numeroDePagantes;
+    // 3. Subtrai 3 do total de pagantes, conforme a nova regra
+    const numeroDePagantesFinal = numeroDePagantesBruto - 3;
+
+    // 4. Calcula e exibe, garantindo que não haja divisão por zero ou número negativo
+    if (numeroDePagantesFinal > 0) {
+        const valorPorPessoa = valorRestante / numeroDePagantesFinal;
         const valorFormatado = valorPorPessoa.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-        costPerPersonElement.innerHTML = `Valor por pessoa (adulto): <strong>${valorFormatado}</strong> (${numeroDePagantes} pagantes)`;
+        costPerPersonElement.innerHTML = `Valor por pessoa (rateio): <strong>${valorFormatado}</strong> (${numeroDePagantesFinal} pagantes)`;
     } else {
-        costPerPersonElement.innerHTML = "Aguardando confirmações de pagantes para calcular o valor...";
+        costPerPersonElement.innerHTML = "Aguardando mais confirmações para o rateio...";
     }
     // --- FIM DA LÓGICA DE CÁLCULO ---
 
@@ -64,32 +66,25 @@ function renderGuest(doc) {
     guestInfo.classList.add('guest-info');
     
     const guestName = document.createElement('span');
-    // Remove o número 'id' do início do nome para uma lista mais limpa
-    guestName.textContent = guest.name; 
+    guestName.textContent = guest.name;
     guestInfo.appendChild(guestName);
 
-    // --- LÓGICA DO CHECKBOX EDITÁVEL ---
     const childCheckboxContainer = document.createElement('div');
     childCheckboxContainer.classList.add('editable-checkbox');
-
     const checkbox = document.createElement('input');
     checkbox.type = 'checkbox';
     checkbox.id = `child_${doc.id}`;
     checkbox.checked = guest.isChild === true;
-    
     checkbox.addEventListener('change', () => {
         guestsCollection.doc(doc.id).update({ isChild: checkbox.checked });
     });
-
     const label = document.createElement('label');
     label.htmlFor = `child_${doc.id}`;
     label.textContent = 'É criança?';
-    
     childCheckboxContainer.appendChild(checkbox);
     childCheckboxContainer.appendChild(label);
     guestInfo.appendChild(childCheckboxContainer);
-    // --- FIM DA LÓGICA DO CHECKBOX ---
-
+    
     guestItem.appendChild(guestInfo);
 
     if (guest.amountPaid > 0) {
@@ -136,12 +131,9 @@ addGuestForm.addEventListener('submit', (e) => {
     addGuestBtn.disabled = true;
     addGuestStatus.textContent = "Adicionando...";
 
-    // ATENÇÃO: COLOQUE A URL DO SEU APP DA WEB AQUI
     const scriptURL = "URL_DO_SEU_APP_DA_WEB_AQUI";
     const payload = {
-        action: 'addGuest',
-        name: guestName,
-        isChild: newGuestIsChildCheckbox.checked
+        action: 'addGuest', name: guestName, isChild: newGuestIsChildCheckbox.checked
     };
 
     fetch(scriptURL, { method: 'POST', body: JSON.stringify(payload) })
@@ -153,7 +145,6 @@ addGuestForm.addEventListener('submit', (e) => {
             } else { throw new Error(response.message); }
         })
         .catch(error => {
-            console.error('Erro:', error);
             addGuestStatus.textContent = 'Erro ao adicionar. Tente novamente.';
         })
         .finally(() => {
@@ -185,7 +176,6 @@ submitReceiptBtn.addEventListener('click', () => {
     const file = receiptFile.files[0];
     if (!file || !currentGuestDocId) { return; }
 
-    // ATENÇÃO: COLOQUE A URL DO SEU APP DA WEB AQUI
     const scriptURL = "https://script.google.com/macros/s/AKfycbzgoIXEOZopMWYDEJg8Uc_elZIvV-HC54ea_EPEo-wyeJmCWsApZa2JjmEVL6HF1zbX/exec"; 
     uploadStatus.textContent = 'Enviando...';
     submitReceiptBtn.disabled = true;
@@ -194,11 +184,8 @@ submitReceiptBtn.addEventListener('click', () => {
     reader.readAsDataURL(file);
     reader.onload = () => {
         const payload = {
-            action: 'uploadReceipt',
-            fileData: reader.result,
-            fileName: file.name,
-            fileType: file.type,
-            guestId: currentGuestDocId
+            action: 'uploadReceipt', fileData: reader.result, fileName: file.name,
+            fileType: file.type, guestId: currentGuestDocId
         };
         fetch(scriptURL, { method: 'POST', body: JSON.stringify(payload) })
             .then(res => res.json())
