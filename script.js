@@ -4,7 +4,7 @@ const firebaseConfig = {
     authDomain: "natal2025-4b00f.firebaseapp.com",
     projectId: "natal2025-4b00f",
     storageBucket: "natal2025-4b00f.firebasestorage.app",
-    messagingSenderId: "1011045410547",
+    messagingSenderId: "111045410547",
     appId: "1:1011045410547:web:10305de407f87442f17986",
     measurementId: "G-YCPLK7YY9B"
 };
@@ -13,33 +13,49 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 const fieldValue = firebase.firestore.FieldValue;
 
+// --- ELEMENTOS E VARIÁVEIS GLOBAIS ---
 const guestsCollection = db.collection('guests');
 const pollDocRef = db.collection('poll').doc('food_and_drink_poll');
+// Nenhuma URL de script é mais necessária aqui, pois removemos o upload de arquivos.
 
-// ===================================================================================
-// ===== ATENÇÃO: ESTE É O ÚNICO LUGAR ONDE VOCÊ PRECISA COLOCAR A SUA URL AGORA =====
-// ===================================================================================
-const scriptURL = "https://script.google.com/macros/s/AKfycbxpq4tS6lcffeeZ6SfIYUyQjRwrgS8iHpMsLyIJj83T86mrOP78I9toZ03JZu696uEf/exec";
-
-
-// Ouve a lista de convidados
+// --- LISTENER PRINCIPAL (EM TEMPO REAL) ---
 guestsCollection.orderBy('name').onSnapshot(snapshot => {
-    document.getElementById('guest-list-container').innerHTML = '';
+    const guestListContainer = document.getElementById('guest-list-container');
+    guestListContainer.innerHTML = '';
+    
+    // --- LÓGICA DE CÁLCULO ATUALIZADA ---
     const adultosConfirmados = snapshot.docs.filter(doc => doc.data().presence_confirmed && !doc.data().isChild);
-    const numeroDePagantesFinal = adultosConfirmados.length - 3;
-    const costEl = document.getElementById('cost-per-person');
-    if (numeroDePagantesFinal > 0) {
-        const valorPorPessoa = 2000 / numeroDePagantesFinal;
-        costEl.innerHTML = `Valor por pessoa (rateio): <strong>${valorPorPessoa.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</strong> (${numeroDePagantesFinal} pagantes)`;
-    } else {
-        costEl.innerHTML = "Aguardando mais confirmações para o rateio...";
-    }
+    const numeroDePagantes = adultosConfirmados.length > 3 ? adultosConfirmados.length - 3 : 0;
+
+    // Calcula os valores por pessoa para a Entrada e Final
+    const valorEntradaPorPessoa = numeroDePagantes > 0 ? 1500 / numeroDePagantes : 0;
+    const valorFinalPorPessoa = numeroDePagantes > 0 ? 500 / numeroDePagantes : 0;
+    
+    document.getElementById('entry-cost-per-person').innerHTML = `Valor da Entrada: <strong>${valorEntradaPorPessoa.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</strong> por pessoa`;
+    document.getElementById('final-cost-per-person').innerHTML = `Valor Final: <strong>${valorFinalPorPessoa.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</strong> por pessoa`;
+    
+    // Calcula o valor que ainda falta
+    let totalPagoMarcado = 0;
+    snapshot.docs.forEach(doc => {
+        const guest = doc.data();
+        if (guest.paidEntry) {
+            totalPagoMarcado += valorEntradaPorPessoa;
+        }
+        if (guest.paidFinal) {
+            totalPagoMarcado += valorFinalPorPessoa;
+        }
+    });
+
+    const valorAindaFalta = 2000 - totalPagoMarcado;
+    document.getElementById('amount-remaining').innerHTML = `<strong>Faltam: ${valorAindaFalta.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</strong>`;
+    
+    // Renderiza cada convidado na lista
     snapshot.docs.forEach(doc => renderGuest(doc));
 }, error => {
     console.error("Erro no listener do Firestore (guests): ", error);
 });
 
-// Ouve a enquete
+// Ouve a enquete (sem alterações)
 pollDocRef.onSnapshot(doc => {
     if (!doc.exists) return;
     const data = doc.data(), vMonthly = data.votes_monthly || 0, vDay = data.votes_on_the_day || 0, total = vMonthly + vDay;
@@ -49,19 +65,37 @@ pollDocRef.onSnapshot(doc => {
     document.getElementById('on-the-day-bar').style.width = `${total > 0 ? (vDay / total) * 100 : 0}%`;
 });
 
+
+// --- FUNÇÃO DE RENDERIZAÇÃO (COMPLETAMENTE REFEITA) ---
 function renderGuest(doc) {
     const guest = doc.data();
     const guestItem = document.createElement('div');
-    guestItem.className = `guest-item ${guest.amountPaid > 0 ? 'paid' : (guest.presence_confirmed ? 'presence-confirmed' : '')}`;
-    guestItem.setAttribute('data-id', doc.id);
-    let buttons = '';
-    if (guest.amountPaid > 0) {
-        buttons = `<span>✅ ${guest.amountPaid.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>`;
+    // Adiciona a classe 'paid' apenas se AMBOS os pagamentos foram feitos
+    guestItem.className = `guest-item ${guest.paidEntry && guest.paidFinal ? 'paid' : (guest.presence_confirmed ? 'presence-confirmed' : '')}`;
+    
+    let actionContent = '';
+    
+    if (guest.paidEntry && guest.paidFinal) {
+        // Se pagou tudo, mostra o status final
+        actionContent = `<span>✅ Pagamento Completo</span>`;
     } else if (guest.presence_confirmed) {
-        buttons = `<button class="upload-btn" onclick="openUploadModal('${guest.name}', '${doc.id}')">Enviar Comprovante</button>`;
+        // Se confirmou presença mas não pagou tudo, mostra os checkboxes de pagamento
+        actionContent = `
+            <div class="payment-checkboxes">
+                <div class="payment-option">
+                    <input type="checkbox" id="entry_${doc.id}" ${guest.paidEntry ? 'checked' : ''} onchange="updatePaymentStatus('${doc.id}', 'paidEntry', this.checked)">
+                    <label for="entry_${doc.id}">Pago Entrada</label>
+                </div>
+                <div class="payment-option">
+                    <input type="checkbox" id="final_${doc.id}" ${guest.paidFinal ? 'checked' : ''} onchange="updatePaymentStatus('${doc.id}', 'paidFinal', this.checked)">
+                    <label for="final_${doc.id}">Pago Final</label>
+                </div>
+            </div>`;
     } else {
-        buttons = `<button class="presence-btn" onclick="confirmPresence('${doc.id}')">Confirmar Presença</button>`;
+        // Se nem confirmou presença, mostra o botão para confirmar
+        actionContent = `<button class="presence-btn" onclick="confirmPresence('${doc.id}')">Confirmar Presença</button>`;
     }
+
     guestItem.innerHTML = `
         <div class="guest-info">
             <span>${guest.name}</span>
@@ -70,48 +104,23 @@ function renderGuest(doc) {
                 <label for="child_${doc.id}">É criança?</label>
             </div>
         </div>
-        ${buttons}`;
+        ${actionContent}`;
+    
     document.getElementById('guest-list-container').appendChild(guestItem);
 }
 
-// Funções chamadas via onclick
+
+// --- FUNÇÕES CHAMADAS VIA ONCLICK ---
 const confirmPresence = (docId) => guestsCollection.doc(docId).update({ presence_confirmed: true });
 const toggleChildStatus = (docId, isChecked) => guestsCollection.doc(docId).update({ isChild: isChecked });
+// Nova função para atualizar o status de pagamento
+const updatePaymentStatus = (docId, field, isChecked) => {
+    guestsCollection.doc(docId).update({ [field]: isChecked });
+};
 
-let currentGuestDocId = null;
-function openUploadModal(name, docId) {
-    document.getElementById('guestName').textContent = name;
-    currentGuestDocId = docId;
-    document.getElementById('uploadStatus').textContent = '';
-    document.getElementById('receiptFile').value = '';
-    document.getElementById('uploadModal').style.display = 'block';
-}
+// --- LÓGICA DO MODAL REMOVIDA ---
 
-// Event Listeners para elementos que não mudam
-document.querySelector('.close-button').onclick = () => document.getElementById('uploadModal').style.display = 'none';
-window.onclick = (event) => { if (event.target == document.getElementById('uploadModal')) { document.getElementById('uploadModal').style.display = 'none'; } };
-
-// LÓGICA DO FORMULÁRIO 'ADICIONAR CONVIDADO' FOI REMOVIDA
-
-document.getElementById('submitReceiptBtn').addEventListener('click', () => {
-    const fileInput = document.getElementById('receiptFile'), statusEl = document.getElementById('uploadStatus');
-    const file = fileInput.files[0];
-    if (!file || !currentGuestDocId) return;
-    statusEl.textContent = 'Enviando...'; document.getElementById('submitReceiptBtn').disabled = true;
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => {
-        const payload = {action: 'uploadReceipt', fileData: reader.result, fileName: file.name, fileType: file.type, guestId: currentGuestDocId};
-        
-        // CORRIGIDO: Agora também usa a constante 'scriptURL'
-        fetch(scriptURL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
-            .then(res => res.json()).then(res => {
-                statusEl.textContent = res.message;
-                setTimeout(() => { document.getElementById('uploadModal').style.display = 'none'; }, 2500);
-            }).catch(err => statusEl.textContent = 'Erro ao enviar.').finally(() => document.getElementById('submitReceiptBtn').disabled = false);
-    };
-});
-
+// --- LÓGICA DE VOTAÇÃO DA ENQUETE (SEM ALTERAÇÃO) ---
 const handleVote = (option) => {
     const btns = document.querySelectorAll('#poll-options button');
     btns.forEach(b => b.disabled = true);
