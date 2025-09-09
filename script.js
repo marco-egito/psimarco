@@ -23,26 +23,31 @@ guestsCollection.orderBy('name').onSnapshot(snapshot => {
     const guestListContainer = document.getElementById('guest-list-container');
     guestListContainer.innerHTML = '';
     
-    // Lógica de cálculo do valor por pessoa
+    // --- LÓGICA DE CÁLCULO ATUALIZADA CONFORME O SEU PEDIDO ---
     const adultosConfirmados = snapshot.docs.filter(doc => doc.data().presence_confirmed && !doc.data().isChild);
     const numeroDePagantes = adultosConfirmados.length > 3 ? adultosConfirmados.length - 3 : 0;
 
+    // Calcula os valores por pessoa para a Entrada e Final
     const valorEntradaPorPessoa = numeroDePagantes > 0 ? 1500 / numeroDePagantes : 0;
     const valorFinalPorPessoa = numeroDePagantes > 0 ? 500 / numeroDePagantes : 0;
     
-    document.getElementById('entry-cost-per-person').innerHTML = `Valor da Entrada: <strong>${valorEntradaPorPessoa.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</strong> por pessoa`;
-    document.getElementById('final-cost-per-person').innerHTML = `Valor Final: <strong>${valorFinalPorPessoa.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</strong> por pessoa`;
+    // Atualiza os textos dos cards de rateio
+    document.getElementById('entry-cost-per-person').innerHTML = `Valor da Entrada (R$ 1.500,00): <strong>${valorEntradaPorPessoa.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</strong> por pessoa`;
+    document.getElementById('final-cost-per-person').innerHTML = `Valor Final (R$ 500,00): <strong>${valorFinalPorPessoa.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</strong> por pessoa`;
     
-    let totalPagoMarcado = 0;
+    // Calcula o valor que ainda falta para a ENTRADA
+    let totalPagoEntrada = 0;
     snapshot.docs.forEach(doc => {
         const guest = doc.data();
-        if (guest.paidEntry) { totalPagoMarcado += valorEntradaPorPessoa; }
-        if (guest.paidFinal) { totalPagoMarcado += valorFinalPorPessoa; }
+        if (guest.paidEntry) {
+            totalPagoEntrada += valorEntradaPorPessoa;
+        }
     });
 
-    const valorAindaFalta = 2000 - totalPagoMarcado;
-    document.getElementById('amount-remaining').innerHTML = `<strong>Faltam: ${valorAindaFalta.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</strong>`;
+    const valorFaltaEntrada = 1500 - totalPagoEntrada;
+    document.getElementById('amount-remaining').innerHTML = `<strong>Faltam (Entrada): ${valorFaltaEntrada.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</strong>`;
     
+    // Renderiza cada convidado na lista
     snapshot.docs.forEach(doc => renderGuest(doc));
 }, error => {
     console.error("Erro no listener do Firestore (guests): ", error);
@@ -70,7 +75,6 @@ function renderGuest(doc) {
     if (guest.paidEntry && guest.paidFinal) {
         actionContent = `<span>✅ Pagamento Completo</span>`;
     } else if (guest.presence_confirmed) {
-        // Se confirmou presença, mostra os checkboxes de pagamento E o botão de desconfirmar
         actionContent = `
             <div class="payment-controls">
                 <div class="payment-checkboxes">
@@ -86,7 +90,6 @@ function renderGuest(doc) {
                 <button class="deconfirm-btn" onclick="togglePresence('${doc.id}', true)">Desconfirmar</button>
             </div>`;
     } else {
-        // Se nem confirmou presença, mostra o botão para confirmar
         actionContent = `<button class="presence-btn" onclick="togglePresence('${doc.id}', false)">Confirmar Presença</button>`;
     }
 
@@ -105,9 +108,7 @@ function renderGuest(doc) {
 
 
 // --- FUNÇÕES CHAMADAS VIA ONCLICK ---
-// ATUALIZADO: a função de confirmar presença agora é um 'toggle'
 const togglePresence = (docId, currentState) => {
-    // Se o estado atual é true, ele vira false, e vice-versa.
     guestsCollection.doc(docId).update({ presence_confirmed: !currentState });
 };
 const toggleChildStatus = (docId, isChecked) => guestsCollection.doc(docId).update({ isChild: isChecked });
