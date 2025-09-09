@@ -22,7 +22,7 @@ const submitReceiptBtn = document.getElementById('submitReceiptBtn');
 
 
 // --- LÓGICA PRINCIPAL DA LISTA DE CONVIDADOS (EM TEMPO REAL) ---
-guestsCollection.orderBy('name').onSnapshot(snapshot => {
+guestsCollection.onSnapshot(snapshot => {
     guestListContainer.innerHTML = ''; // Limpa a lista antes de renderizar
     
     // --- LÓGICA DE CÁLCULO DO VALOR POR PESSOA (COMO COMBINAMOS) ---
