@@ -85,7 +85,7 @@ function openUploadModal(name, docId) {
 document.querySelector('.close-button').onclick = () => document.getElementById('uploadModal').style.display = 'none';
 window.onclick = (event) => { if (event.target == document.getElementById('uploadModal')) { document.getElementById('uploadModal').style.display = 'none'; } };
 
-const scriptURL = "https://script.google.com/macros/s/AKfycbzgoIXEOZopMWYDEJg8Uc_elZIvV-HC54ea_EPEo-wyeJmCWsApZa2JjmEVL6HF1zbX/exec"; // SUA URL AQUI
+const scriptURL = "https://script.google.com/macros/s/AKfycbwSiUT0nfVE0KZ8ehi01lb3g1tXHZMoCz_e2HWwWgqhnVkCkhHGqiUk_AvXwMMmmGSh/exec"; // SUA URL AQUI
 
 document.getElementById('addGuestForm').addEventListener('submit', e => {
     e.preventDefault();
