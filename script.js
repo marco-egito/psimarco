@@ -16,46 +16,39 @@ const fieldValue = firebase.firestore.FieldValue;
 // --- ELEMENTOS E VARIÁVEIS GLOBAIS ---
 const guestsCollection = db.collection('guests');
 const pollDocRef = db.collection('poll').doc('food_and_drink_poll');
-// Nenhuma URL de script é mais necessária aqui, pois removemos o upload de arquivos.
+// Nenhuma URL de script é mais necessária.
 
 // --- LISTENER PRINCIPAL (EM TEMPO REAL) ---
 guestsCollection.orderBy('name').onSnapshot(snapshot => {
     const guestListContainer = document.getElementById('guest-list-container');
     guestListContainer.innerHTML = '';
     
-    // --- LÓGICA DE CÁLCULO ATUALIZADA ---
+    // Lógica de cálculo do valor por pessoa
     const adultosConfirmados = snapshot.docs.filter(doc => doc.data().presence_confirmed && !doc.data().isChild);
     const numeroDePagantes = adultosConfirmados.length > 3 ? adultosConfirmados.length - 3 : 0;
 
-    // Calcula os valores por pessoa para a Entrada e Final
     const valorEntradaPorPessoa = numeroDePagantes > 0 ? 1500 / numeroDePagantes : 0;
     const valorFinalPorPessoa = numeroDePagantes > 0 ? 500 / numeroDePagantes : 0;
     
     document.getElementById('entry-cost-per-person').innerHTML = `Valor da Entrada: <strong>${valorEntradaPorPessoa.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</strong> por pessoa`;
     document.getElementById('final-cost-per-person').innerHTML = `Valor Final: <strong>${valorFinalPorPessoa.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</strong> por pessoa`;
     
-    // Calcula o valor que ainda falta
     let totalPagoMarcado = 0;
     snapshot.docs.forEach(doc => {
         const guest = doc.data();
-        if (guest.paidEntry) {
-            totalPagoMarcado += valorEntradaPorPessoa;
-        }
-        if (guest.paidFinal) {
-            totalPagoMarcado += valorFinalPorPessoa;
-        }
+        if (guest.paidEntry) { totalPagoMarcado += valorEntradaPorPessoa; }
+        if (guest.paidFinal) { totalPagoMarcado += valorFinalPorPessoa; }
     });
 
     const valorAindaFalta = 2000 - totalPagoMarcado;
     document.getElementById('amount-remaining').innerHTML = `<strong>Faltam: ${valorAindaFalta.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</strong>`;
     
-    // Renderiza cada convidado na lista
     snapshot.docs.forEach(doc => renderGuest(doc));
 }, error => {
     console.error("Erro no listener do Firestore (guests): ", error);
 });
 
-// Ouve a enquete (sem alterações)
+// Ouve a enquete
 pollDocRef.onSnapshot(doc => {
     if (!doc.exists) return;
     const data = doc.data(), vMonthly = data.votes_monthly || 0, vDay = data.votes_on_the_day || 0, total = vMonthly + vDay;
@@ -66,34 +59,35 @@ pollDocRef.onSnapshot(doc => {
 });
 
 
-// --- FUNÇÃO DE RENDERIZAÇÃO (COMPLETAMENTE REFEITA) ---
+// --- FUNÇÃO DE RENDERIZAÇÃO (COM LÓGICA DE DESCONFIRMAR) ---
 function renderGuest(doc) {
     const guest = doc.data();
     const guestItem = document.createElement('div');
-    // Adiciona a classe 'paid' apenas se AMBOS os pagamentos foram feitos
     guestItem.className = `guest-item ${guest.paidEntry && guest.paidFinal ? 'paid' : (guest.presence_confirmed ? 'presence-confirmed' : '')}`;
     
     let actionContent = '';
     
     if (guest.paidEntry && guest.paidFinal) {
-        // Se pagou tudo, mostra o status final
         actionContent = `<span>✅ Pagamento Completo</span>`;
     } else if (guest.presence_confirmed) {
-        // Se confirmou presença mas não pagou tudo, mostra os checkboxes de pagamento
+        // Se confirmou presença, mostra os checkboxes de pagamento E o botão de desconfirmar
         actionContent = `
-            <div class="payment-checkboxes">
-                <div class="payment-option">
-                    <input type="checkbox" id="entry_${doc.id}" ${guest.paidEntry ? 'checked' : ''} onchange="updatePaymentStatus('${doc.id}', 'paidEntry', this.checked)">
-                    <label for="entry_${doc.id}">Pago Entrada</label>
+            <div class="payment-controls">
+                <div class="payment-checkboxes">
+                    <div class="payment-option">
+                        <input type="checkbox" id="entry_${doc.id}" ${guest.paidEntry ? 'checked' : ''} onchange="updatePaymentStatus('${doc.id}', 'paidEntry', this.checked)">
+                        <label for="entry_${doc.id}">Pago Entrada</label>
+                    </div>
+                    <div class="payment-option">
+                        <input type="checkbox" id="final_${doc.id}" ${guest.paidFinal ? 'checked' : ''} onchange="updatePaymentStatus('${doc.id}', 'paidFinal', this.checked)">
+                        <label for="final_${doc.id}">Pago Final</label>
+                    </div>
                 </div>
-                <div class="payment-option">
-                    <input type="checkbox" id="final_${doc.id}" ${guest.paidFinal ? 'checked' : ''} onchange="updatePaymentStatus('${doc.id}', 'paidFinal', this.checked)">
-                    <label for="final_${doc.id}">Pago Final</label>
-                </div>
+                <button class="deconfirm-btn" onclick="togglePresence('${doc.id}', true)">Desconfirmar</button>
             </div>`;
     } else {
         // Se nem confirmou presença, mostra o botão para confirmar
-        actionContent = `<button class="presence-btn" onclick="confirmPresence('${doc.id}')">Confirmar Presença</button>`;
+        actionContent = `<button class="presence-btn" onclick="togglePresence('${doc.id}', false)">Confirmar Presença</button>`;
     }
 
     guestItem.innerHTML = `
@@ -111,16 +105,17 @@ function renderGuest(doc) {
 
 
 // --- FUNÇÕES CHAMADAS VIA ONCLICK ---
-const confirmPresence = (docId) => guestsCollection.doc(docId).update({ presence_confirmed: true });
+// ATUALIZADO: a função de confirmar presença agora é um 'toggle'
+const togglePresence = (docId, currentState) => {
+    // Se o estado atual é true, ele vira false, e vice-versa.
+    guestsCollection.doc(docId).update({ presence_confirmed: !currentState });
+};
 const toggleChildStatus = (docId, isChecked) => guestsCollection.doc(docId).update({ isChild: isChecked });
-// Nova função para atualizar o status de pagamento
 const updatePaymentStatus = (docId, field, isChecked) => {
     guestsCollection.doc(docId).update({ [field]: isChecked });
 };
 
-// --- LÓGICA DO MODAL REMOVIDA ---
-
-// --- LÓGICA DE VOTAÇÃO DA ENQUETE (SEM ALTERAÇÃO) ---
+// --- LÓGICA DE VOTAÇÃO DA ENQUETE ---
 const handleVote = (option) => {
     const btns = document.querySelectorAll('#poll-options button');
     btns.forEach(b => b.disabled = true);
