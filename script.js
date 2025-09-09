@@ -16,6 +16,12 @@ const fieldValue = firebase.firestore.FieldValue;
 const guestsCollection = db.collection('guests');
 const pollDocRef = db.collection('poll').doc('food_and_drink_poll');
 
+// ===================================================================================
+// ===== ATENÇÃO: ESTE É O ÚNICO LUGAR ONDE VOCÊ PRECISA COLOCAR A SUA URL AGORA =====
+// ===================================================================================
+const scriptURL = "https://script.google.com/macros/s/AKfycbxpq4tS6lcffeeZ6SfIYUyQjRwrgS8iHpMsLyIJj83T86mrOP78I9toZ03JZu696uEf/exec";
+
+
 // Ouve a lista de convidados
 guestsCollection.orderBy('name').onSnapshot(snapshot => {
     document.getElementById('guest-list-container').innerHTML = '';
@@ -85,7 +91,6 @@ function openUploadModal(name, docId) {
 document.querySelector('.close-button').onclick = () => document.getElementById('uploadModal').style.display = 'none';
 window.onclick = (event) => { if (event.target == document.getElementById('uploadModal')) { document.getElementById('uploadModal').style.display = 'none'; } };
 
-const scriptURL = "https://script.google.com/macros/s/AKfycbwSiUT0nfVE0KZ8ehi01lb3g1tXHZMoCz_e2HWwWgqhnVkCkhHGqiUk_AvXwMMmmGSh/exec"; // SUA URL AQUI
 
 document.getElementById('addGuestForm').addEventListener('submit', e => {
     e.preventDefault();
@@ -95,6 +100,8 @@ document.getElementById('addGuestForm').addEventListener('submit', e => {
     const btn = document.getElementById('addGuestBtn'), statusEl = document.getElementById('addGuestStatus');
     btn.disabled = true; statusEl.textContent = "Adicionando...";
     const payload = {action: 'addGuest', name: name, isChild: isChildCheck.checked};
+    
+    // CORRIGIDO: Agora usa a constante 'scriptURL'
     fetch(scriptURL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
         .then(res => res.json()).then(res => {
             if (res.status === "success") { statusEl.textContent = res.message; e.target.reset(); } 
@@ -113,6 +120,8 @@ document.getElementById('submitReceiptBtn').addEventListener('click', () => {
     reader.readAsDataURL(file);
     reader.onload = () => {
         const payload = {action: 'uploadReceipt', fileData: reader.result, fileName: file.name, fileType: file.type, guestId: currentGuestDocId};
+        
+        // CORRIGIDO: Agora também usa a constante 'scriptURL'
         fetch(scriptURL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
             .then(res => res.json()).then(res => {
                 statusEl.textContent = res.message;
