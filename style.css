@@ -54,10 +54,18 @@ h2 {
 }
 
 /* --- ESTILOS ATUALIZADOS PARA META E RATEIO --- */
+.goal-details.new-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    align-items: center;
+}
+
 .goal-details .remaining {
     color: var(--primary-color);
     font-size: 1.2em;
     font-weight: bold;
+    margin-top: 10px;
 }
 
 .cost-split {
@@ -126,6 +134,25 @@ h2 {
     background-color: #1565c0;
 }
 
+/* --- NOVO ESTILO PARA O BOTÃO DESCONFIRMAR --- */
+.deconfirm-btn {
+    background-color: #d32f2f; /* Vermelho */
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.8em;
+    margin-top: 10px;
+    width: 100%;
+}
+
+.deconfirm-btn:hover {
+    background-color: #c62828;
+}
+/* --- FIM DO NOVO ESTILO --- */
+
+
 #chacara h3 { text-align: center; color: var(--secondary-color); font-size: 1.8em; margin-top: 0; }
 #chacara .location { text-align: center; font-style: italic; color: #555; margin-bottom: 25px; }
 #chacara .details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin-bottom: 25px; }
@@ -168,12 +195,16 @@ footer { text-align: center; padding: 20px; margin-top: 30px; color: #666; }
     cursor: pointer;
 }
 
-/* --- NOVOS ESTILOS PARA CHECKBOXES DE PAGAMENTO --- */
+.payment-controls {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
 .payment-checkboxes {
     display: flex;
     flex-direction: column;
     gap: 8px;
-    margin-top: 8px;
 }
 
 .payment-option {
@@ -188,7 +219,6 @@ footer { text-align: center; padding: 20px; margin-top: 30px; color: #666; }
     color: #333;
     cursor: pointer;
 }
-/* --- FIM DOS ESTILOS DE PAGAMENTO --- */
 
 #poll-section { text-align: center; }
 #poll-options { display: flex; justify-content: center; gap: 15px; margin: 25px 0; }
@@ -212,4 +242,5 @@ footer { text-align: center; padding: 20px; margin-top: 30px; color: #666; }
     header h1 { font-size: 2em; }
     h2 { font-size: 1.2em; }
     .cost-split { flex-direction: column; }
+    .goal-details.new-layout { grid-template-columns: 1fr; }
 }
