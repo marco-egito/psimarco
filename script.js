@@ -1,12 +1,12 @@
-// ATENÇÃO: Cole aqui a configuração do seu projeto Firebase
+// ATENÇÃO: COLOQUE A CONFIGURAÇÃO DO SEU PROJETO FIREBASE AQUI
 const firebaseConfig = {
-  apiKey: "AIzaSyAjgzXuxHtOO32rzLGCmgOVN5gV8OzeImE",
-  authDomain: "natal2025-4b00f.firebaseapp.com",
-  projectId: "natal2025-4b00f",
-  storageBucket: "natal2025-4b00f.firebasestorage.app",
-  messagingSenderId: "1011045410547",
-  appId: "1:1011045410547:web:10305de407f87442f17986",
-  measurementId: "G-YCPLK7YY9B"
+    apiKey: "AIzaSyAjgzXuxHtOO32rzLGCmgOVN5gV8OzeImE",
+    authDomain: "natal2025-4b00f.firebaseapp.com",
+    projectId: "natal2025-4b00f",
+    storageBucket: "natal2025-4b00f.firebasestorage.app",
+    messagingSenderId: "1011045410547",
+    appId: "1:1011045410547:web:10305de407f87442f17986",
+    measurementId: "G-YCPLK7YY9B"
 };
 
 // Inicializa o Firebase
@@ -22,26 +22,20 @@ const submitReceiptBtn = document.getElementById('submitReceiptBtn');
 
 
 // --- LÓGICA PRINCIPAL DA LISTA DE CONVIDADOS (EM TEMPO REAL) ---
-guestsCollection.onSnapshot(snapshot => {
-    guestListContainer.innerHTML = ''; // Limpa a lista antes de renderizar
+guestsCollection.orderBy('name').onSnapshot(snapshot => {
+    guestListContainer.innerHTML = ''; 
     
-    // --- LÓGICA DE CÁLCULO DO VALOR POR PESSOA (COMO COMBINAMOS) ---
-    const valorRestante = 2000; // O cálculo é sobre o valor que falta
+    const valorRestante = 2000;
     const costPerPersonElement = document.getElementById('cost-per-person');
 
-    // 1. Filtra para encontrar todos os adultos que confirmaram presença
     const adultosConfirmados = snapshot.docs.filter(doc => {
         const guest = doc.data();
         return guest.presence_confirmed === true && !guest.isChild;
     });
 
-    // 2. Pega o número total de adultos confirmados
     const numeroDePagantesBruto = adultosConfirmados.length;
-
-    // 3. Subtrai 3 do total de pagantes, conforme a nova regra
     const numeroDePagantesFinal = numeroDePagantesBruto - 3;
 
-    // 4. Calcula e exibe, garantindo que não haja divisão por zero ou número negativo
     if (numeroDePagantesFinal > 0) {
         const valorPorPessoa = valorRestante / numeroDePagantesFinal;
         const valorFormatado = valorPorPessoa.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -49,9 +43,7 @@ guestsCollection.onSnapshot(snapshot => {
     } else {
         costPerPersonElement.innerHTML = "Aguardando mais confirmações para o rateio...";
     }
-    // --- FIM DA LÓGICA DE CÁLCULO ---
 
-    // Renderiza cada convidado na lista
     snapshot.docs.forEach(doc => renderGuest(doc));
 });
 
@@ -122,25 +114,31 @@ addGuestForm.addEventListener('submit', (e) => {
     if (!guestName) return;
     addGuestBtn.disabled = true;
     addGuestStatus.textContent = "Adicionando...";
-    const scriptURL = "https://script.google.com/macros/s/AKfycbzgoIXEOZopMWYDEJg8Uc_elZIvV-HC54ea_EPEo-wyeJmCWsApZa2JjmEVL6HF1zbX/exec"; // ATENÇÃO: COLOQUE SUA URL AQUI
+    const scriptURL = "https://script.google.com/macros/s/AKfycbzgoIXEOZopMWYDEJg8Uc_elZIvV-HC54ea_EPEo-wyeJmCWsApZa2JjmEVL6HF1zbX/exec";
     const payload = {
         action: 'addGuest', name: guestName, isChild: newGuestIsChildCheckbox.checked
     };
-    fetch(scriptURL, { method: 'POST', body: JSON.stringify(payload) })
-        .then(res => res.json())
-        .then(response => {
-            if (response.status === "success") {
-                addGuestStatus.textContent = response.message;
-                addGuestForm.reset();
-            } else { throw new Error(response.message); }
-        })
-        .catch(error => {
-            addGuestStatus.textContent = 'Erro ao adicionar. Tente novamente.';
-        })
-        .finally(() => {
-            addGuestBtn.disabled = false;
-            setTimeout(() => { addGuestStatus.textContent = ''; }, 3000);
-        });
+
+    // ALTERAÇÃO ABAIXO: Adicionamos o 'headers'
+    fetch(scriptURL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+    })
+    .then(res => res.json())
+    .then(response => {
+        if (response.status === "success") {
+            addGuestStatus.textContent = response.message;
+            addGuestForm.reset();
+        } else { throw new Error(response.message); }
+    })
+    .catch(error => {
+        addGuestStatus.textContent = 'Erro ao adicionar. Tente novamente.';
+    })
+    .finally(() => {
+        addGuestBtn.disabled = false;
+        setTimeout(() => { addGuestStatus.textContent = ''; }, 3000);
+    });
 });
 
 // --- LÓGICA DO MODAL E UPLOAD DE COMPROVANTE ---
@@ -163,7 +161,7 @@ submitReceiptBtn.addEventListener('click', () => {
     const uploadStatus = document.getElementById('uploadStatus');
     const file = receiptFile.files[0];
     if (!file || !currentGuestDocId) { return; }
-    const scriptURL = "https://script.google.com/macros/s/AKfycbzgoIXEOZopMWYDEJg8Uc_elZIvV-HC54ea_EPEo-wyeJmCWsApZa2JjmEVL6HF1zbX/exec"; // ATENÇÃO: COLOQUE SUA URL AQUI
+    const scriptURL = "https://script.google.com/macros/s/AKfycbzgoIXEOZopMWYDEJg8Uc_elZIvV-HC54ea_EPEo-wyeJmCWsApZa2JjmEVL6HF1zbX/exec";
     uploadStatus.textContent = 'Enviando...';
     submitReceiptBtn.disabled = true;
     const reader = new FileReader();
@@ -173,14 +171,19 @@ submitReceiptBtn.addEventListener('click', () => {
             action: 'uploadReceipt', fileData: reader.result, fileName: file.name,
             fileType: file.type, guestId: currentGuestDocId
         };
-        fetch(scriptURL, { method: 'POST', body: JSON.stringify(payload) })
-            .then(res => res.json())
-            .then(response => {
-                uploadStatus.textContent = response.message;
-                setTimeout(() => { modal.style.display = 'none'; }, 2500);
-            })
-            .catch(error => { uploadStatus.textContent = 'Erro ao enviar.'; })
-            .finally(() => { submitReceiptBtn.disabled = false; });
+        // ALTERAÇÃO ABAIXO: Adicionamos o 'headers'
+        fetch(scriptURL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        })
+        .then(res => res.json())
+        .then(response => {
+            uploadStatus.textContent = response.message;
+            setTimeout(() => { modal.style.display = 'none'; }, 2500);
+        })
+        .catch(error => { uploadStatus.textContent = 'Erro ao enviar.'; })
+        .finally(() => { submitReceiptBtn.disabled = false; });
     };
 });
 
