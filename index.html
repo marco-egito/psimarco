@@ -49,7 +49,6 @@
                         <li>💰 50% do valor é pago na reserva. O restante na entrada. Em caso de desistência, a reserva não é devolvida.</li>
                     </ul>
                 </div>
-
             </div>
 
             <a href="https://www.instagram.com/reel/Cx6MbFxPbi2/?igshid=MzRlODBiNWFlZA==" target="_blank" class="gallery-link">
@@ -59,7 +58,7 @@
 
 
         <section id="meta">
-            <h2>Nossa Meta em Conjunto</h2>
+            <h2>Nossa Meta e Rateio</h2>
             <p>Juntos, vamos garantir o local da nossa festa!</p>
             <div class="goal-details">
                 <p><strong>Valor total do aluguel:</strong> R$ 3.000,00</p>
@@ -79,6 +78,20 @@
             </div>
             <p class="comprovante-info">Após a transferência, por favor, encontre seu nome na lista abaixo e anexe o comprovante.</p>
         </section>
+
+        <section id="add-guest">
+            <h2>Adicionar Convidado à Lista</h2>
+            <form id="addGuestForm">
+                <input type="text" id="newGuestName" placeholder="Nome completo do convidado" required>
+                <div class="is-child-checkbox">
+                    <input type="checkbox" id="newGuestIsChild">
+                    <label for="newGuestIsChild">É uma criança? (não entra no rateio)</label>
+                </div>
+                <button type="submit" id="addGuestBtn">Adicionar à Lista</button>
+                <p id="addGuestStatus"></p>
+            </form>
+        </section>
+
 
         <section id="confirmacao">
             <h2>Lista de Confirmação e Pagamento</h2>
