@@ -9,16 +9,6 @@ const firebaseConfig = {
   measurementId: "G-YCPLK7YY9B"
 };
 
-// ATENÇÃO: COLOQUE A CONFIGURAÇÃO DO SEU PROJETO FIREBASE AQUI
-const firebaseConfig = {
-    apiKey: "SUA_API_KEY",
-    authDomain: "SEU_AUTH_DOMAIN",
-    projectId: "SEU_PROJECT_ID",
-    storageBucket: "SEU_STORAGE_BUCKET",
-    messagingSenderId: "SEU_MESSAGING_SENDER_ID",
-    appId: "SEU_APP_ID"
-};
-
 // Inicializa o Firebase
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
@@ -33,19 +23,25 @@ const submitReceiptBtn = document.getElementById('submitReceiptBtn');
 
 // --- LÓGICA PRINCIPAL DA LISTA DE CONVIDADOS (EM TEMPO REAL) ---
 guestsCollection.orderBy('name').onSnapshot(snapshot => {
-    guestListContainer.innerHTML = '';
+    guestListContainer.innerHTML = ''; // Limpa a lista antes de renderizar
     
-    const valorRestante = 2000;
+    // --- LÓGICA DE CÁLCULO DO VALOR POR PESSOA (COMO COMBINAMOS) ---
+    const valorRestante = 2000; // O cálculo é sobre o valor que falta
     const costPerPersonElement = document.getElementById('cost-per-person');
 
+    // 1. Filtra para encontrar todos os adultos que confirmaram presença
     const adultosConfirmados = snapshot.docs.filter(doc => {
         const guest = doc.data();
         return guest.presence_confirmed === true && !guest.isChild;
     });
 
+    // 2. Pega o número total de adultos confirmados
     const numeroDePagantesBruto = adultosConfirmados.length;
+
+    // 3. Subtrai 3 do total de pagantes, conforme a nova regra
     const numeroDePagantesFinal = numeroDePagantesBruto - 3;
 
+    // 4. Calcula e exibe, garantindo que não haja divisão por zero ou número negativo
     if (numeroDePagantesFinal > 0) {
         const valorPorPessoa = valorRestante / numeroDePagantesFinal;
         const valorFormatado = valorPorPessoa.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -53,14 +49,15 @@ guestsCollection.orderBy('name').onSnapshot(snapshot => {
     } else {
         costPerPersonElement.innerHTML = "Aguardando mais confirmações para o rateio...";
     }
+    // --- FIM DA LÓGICA DE CÁLCULO ---
 
+    // Renderiza cada convidado na lista
     snapshot.docs.forEach(doc => renderGuest(doc));
 });
 
 
 // --- FUNÇÃO PARA RENDERIZAR CADA CONVIDADO ---
 function renderGuest(doc) {
-    // ... (Esta função continua exatamente a mesma da última vez)
     const guest = doc.data();
     const guestItem = document.createElement('div');
     guestItem.classList.add('guest-item');
@@ -116,7 +113,6 @@ function createButton(text, className, onClick) {
 // --- LÓGICA DO FORMULÁRIO DE ADICIONAR CONVIDADO ---
 const addGuestForm = document.getElementById('addGuestForm');
 addGuestForm.addEventListener('submit', (e) => {
-    // ... (Esta função continua exatamente a mesma da última vez)
     e.preventDefault();
     const newGuestNameInput = document.getElementById('newGuestName');
     const newGuestIsChildCheckbox = document.getElementById('newGuestIsChild');
@@ -148,7 +144,6 @@ addGuestForm.addEventListener('submit', (e) => {
 });
 
 // --- LÓGICA DO MODAL E UPLOAD DE COMPROVANTE ---
-// ... (Esta seção continua exatamente a mesma da última vez)
 let currentGuestDocId = null;
 function openUploadModal(name, docId) {
     const guestNameEl = document.getElementById('guestName');
@@ -189,9 +184,7 @@ submitReceiptBtn.addEventListener('click', () => {
     };
 });
 
-// --------------------------------------------------
-// --- NOVA LÓGICA DA ENQUETE ---
-// --------------------------------------------------
+// --- LÓGICA DA ENQUETE ---
 const pollDocRef = db.collection('poll').doc('food_and_drink_poll');
 const voteMonthlyBtn = document.getElementById('vote-monthly-btn');
 const voteOnTheDayBtn = document.getElementById('vote-on-the-day-btn');
@@ -201,57 +194,40 @@ const monthlyVotes = document.getElementById('monthly-votes');
 const onTheDayVotes = document.getElementById('on-the-day-votes');
 const pollStatus = document.getElementById('poll-status');
 
-// 1. Ouve as mudanças nos votos em tempo real
 pollDocRef.onSnapshot(doc => {
     if (!doc.exists) return;
-
     const data = doc.data();
     const votesMonthly = data.votes_monthly || 0;
     const votesOnTheDay = data.votes_on_the_day || 0;
     const totalVotes = votesMonthly + votesOnTheDay;
-
-    // Atualiza os textos
     monthlyVotes.textContent = `${votesMonthly} votos`;
     onTheDayVotes.textContent = `${votesOnTheDay} votos`;
-
-    // Calcula e atualiza as barras de porcentagem
     const monthlyPercent = totalVotes > 0 ? (votesMonthly / totalVotes) * 100 : 0;
     const onTheDayPercent = totalVotes > 0 ? (votesOnTheDay / totalVotes) * 100 : 0;
-
     monthlyBar.style.width = `${monthlyPercent}%`;
     onTheDayBar.style.width = `${onTheDayPercent}%`;
 });
 
-// 2. Função para registrar um voto
 function handleVote(option) {
-    // Desabilita os botões para prevenir cliques duplos
     voteMonthlyBtn.disabled = true;
     voteOnTheDayBtn.disabled = true;
     pollStatus.textContent = "Registrando seu voto...";
-
     const fieldToUpdate = option === 'monthly' ? 'votes_monthly' : 'votes_on_the_day';
-
-    pollDocRef.update({
-        [fieldToUpdate]: fieldValue.increment(1) // Incrementa o voto no Firebase
-    })
+    pollDocRef.update({ [fieldToUpdate]: fieldValue.increment(1) })
     .then(() => {
-        // Salva no navegador que o usuário já votou
         localStorage.setItem('voted_food_poll', 'true');
         pollStatus.textContent = "Obrigado pelo seu voto!";
     })
     .catch(error => {
         pollStatus.textContent = "Erro ao votar. Tente novamente.";
-        // Reabilita os botões em caso de erro
         voteMonthlyBtn.disabled = false;
         voteOnTheDayBtn.disabled = false;
     });
 }
 
-// 3. Adiciona os eventos de clique aos botões
 voteMonthlyBtn.addEventListener('click', () => handleVote('monthly'));
 voteOnTheDayBtn.addEventListener('click', () => handleVote('on_the_day'));
 
-// 4. Verifica se o usuário já votou ao carregar a página
 function checkIfVoted() {
     if (localStorage.getItem('voted_food_poll') === 'true') {
         voteMonthlyBtn.disabled = true;
@@ -259,6 +235,4 @@ function checkIfVoted() {
         pollStatus.textContent = "Você já votou nesta enquete.";
     }
 }
-
-// Roda a verificação assim que a página carrega
 checkIfVoted();
