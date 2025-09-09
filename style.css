@@ -43,13 +43,12 @@ section {
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
-/* NOVO ESTILO UNIFICADO PARA OS TÍTULOS DE SEÇÃO */
 h2 {
     background: var(--header-gradient);
     color: white;
     padding: 15px 20px;
-    margin: -25px -25px 20px -25px; /* Faz o título ocupar toda a largura do card */
-    border-radius: 8px 8px 0 0; /* Arredonda apenas os cantos superiores */
+    margin: -25px -25px 20px -25px;
+    border-radius: 8px 8px 0 0;
     text-align: center;
     font-size: 1.5em;
 }
@@ -82,9 +81,14 @@ h2 {
     border-radius: 5px;
 }
 
-.guest-item.confirmed {
+.guest-item.paid {
     background-color: #e8f5e9;
     border-left: 5px solid var(--secondary-color);
+}
+
+.guest-item.presence-confirmed {
+    background-color: #fff9c4;
+    border-left: 5px solid #fbc02d;
 }
 
 .upload-btn {
@@ -99,94 +103,8 @@ h2 {
 
 .upload-btn:hover { opacity: 0.9; }
 
-/* ESTILOS PARA A NOVA SEÇÃO DA CHÁCARA */
-#chacara h3 {
-    text-align: center;
-    color: var(--secondary-color);
-    font-size: 1.8em;
-    margin-top: 0;
-}
-#chacara .location {
-    text-align: center;
-    font-style: italic;
-    color: #555;
-    margin-bottom: 25px;
-}
-#chacara .details-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 25px;
-    margin-bottom: 25px;
-}
-#chacara ul {
-    list-style: none;
-    padding-left: 0;
-}
-#chacara li {
-    padding-left: 1.5em;
-    text-indent: -1.5em;
-    margin-bottom: 10px;
-}
-#chacara li::before {
-    content: '✓';
-    color: var(--secondary-color);
-    margin-right: 10px;
-}
-#chacara .warning { color: var(--primary-color); font-weight: bold; }
-#chacara .warning::before { content: '⚠️'; margin-right: 10px; }
-
-#chacara .gallery-link {
-    display: block;
-    width: fit-content;
-    margin: 20px auto 0 auto;
-    background-color: #1a4a8a;
-    color: white;
-    padding: 12px 25px;
-    border-radius: 5px;
-    text-decoration: none;
-    font-weight: bold;
-    transition: background-color 0.3s;
-}
-#chacara .gallery-link:hover { background-color: #11335c; }
-
-
-/* Estilos do Modal (sem alteração) */
-.modal { display: none; position: fixed; z-index: 1; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.6); }
-.modal-content { background-color: #fefefe; margin: 15% auto; padding: 20px; border: 1px solid #888; width: 80%; max-width: 400px; border-radius: 8px; text-align: center; }
-.close-button { color: #aaa; float: right; font-size: 28px; font-weight: bold; }
-.close-button:hover, .close-button:focus { color: black; text-decoration: none; cursor: pointer; }
-#submitReceiptBtn { background-color: var(--secondary-color); color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; margin-top: 15px; }
-
-footer { text-align: center; padding: 20px; margin-top: 30px; color: #666; }
-
-/* Ajuste para telas menores */
-@media (max-width: 600px) {
-    #chacara .details-grid {
-        grid-template-columns: 1fr;
-    }
-    header h1 {
-        font-size: 2em;
-    }
-    h2 {
-        font-size: 1.2em;
-    }
-}
-/* Adicione estas classes ao final do seu style.css */
-
-.guest-item.presence-confirmed {
-    background-color: #fff9c4; /* Amarelo claro */
-    border-left: 5px solid #fbc02d; /* Amarelo escuro */
-}
-
-/* Renomeando a classe .confirmed para .paid para ficar mais claro */
-.guest-item.paid {
-    background-color: #e8f5e9; /* Verde claro */
-    border-left: 5px solid var(--secondary-color);
-}
-
 .presence-btn {
-    
-    background-color: #1976d2; /* Azul */
+    background-color: #1976d2;
     color: white;
     border: none;
     padding: 8px 12px;
@@ -198,12 +116,64 @@ footer { text-align: center; padding: 20px; margin-top: 30px; color: #666; }
 .presence-btn:hover {
     background-color: #1565c0;
 }
-.cost-share {
-    margin-top: 20px;
-    padding: 15px;
-    background-color: #e3f2fd; /* Azul bem claro */
-    border-left: 5px solid #1976d2; /* Azul principal */
-    font-size: 1.1em;
-    font-weight: 500;
-    text-align: center;
+
+#chacara h3 { text-align: center; color: var(--secondary-color); font-size: 1.8em; margin-top: 0; }
+#chacara .location { text-align: center; font-style: italic; color: #555; margin-bottom: 25px; }
+#chacara .details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin-bottom: 25px; }
+#chacara ul { list-style: none; padding-left: 0; }
+#chacara li { padding-left: 1.5em; text-indent: -1.5em; margin-bottom: 10px; }
+#chacara li::before { content: '✓'; color: var(--secondary-color); margin-right: 10px; }
+#chacara .warning { color: var(--primary-color); font-weight: bold; }
+#chacara .warning::before { content: '⚠️'; margin-right: 10px; }
+#chacara .gallery-link { display: block; width: fit-content; margin: 20px auto 0 auto; background-color: #1a4a8a; color: white; padding: 12px 25px; border-radius: 5px; text-decoration: none; font-weight: bold; transition: background-color 0.3s; }
+#chacara .gallery-link:hover { background-color: #11335c; }
+
+.modal { display: none; position: fixed; z-index: 1; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.6); }
+.modal-content { background-color: #fefefe; margin: 15% auto; padding: 20px; border: 1px solid #888; width: 80%; max-width: 400px; border-radius: 8px; text-align: center; }
+.close-button { color: #aaa; float: right; font-size: 28px; font-weight: bold; }
+.close-button:hover, .close-button:focus { color: black; text-decoration: none; cursor: pointer; }
+#submitReceiptBtn { background-color: var(--secondary-color); color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; margin-top: 15px; }
+
+footer { text-align: center; padding: 20px; margin-top: 30px; color: #666; }
+
+.admin-contact { font-size: 0.9em; text-align: center; background-color: #eef; padding: 10px; border-radius: 5px; }
+
+.cost-share { margin-top: 20px; padding: 15px; background-color: #e3f2fd; border-left: 5px solid #1976d2; font-size: 1.1em; font-weight: 500; text-align: center; }
+
+#addGuestForm { display: flex; flex-direction: column; gap: 15px; }
+#addGuestForm input[type="text"] { padding: 12px; font-size: 1em; border: 1px solid #ccc; border-radius: 5px; }
+#addGuestForm .is-child-checkbox { display: flex; align-items: center; gap: 10px; }
+#addGuestForm button { background-color: var(--secondary-color); color: white; padding: 12px; font-size: 1.1em; border: none; border-radius: 5px; cursor: pointer; transition: background-color 0.3s; }
+#addGuestForm button:hover { background-color: #145a14; }
+#addGuestStatus { text-align: center; font-weight: bold; min-height: 20px; }
+
+/* --- ESTILOS PARA O CHECKBOX EDITÁVEL NA LISTA --- */
+.guest-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+}
+
+.editable-checkbox {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.editable-checkbox label {
+    margin-left: 8px;
+    font-size: 0.9em;
+    color: #555;
+    cursor: pointer;
+}
+
+.child-indicator {
+    display: none;
+}
+
+@media (max-width: 600px) {
+    #chacara .details-grid { grid-template-columns: 1fr; }
+    header h1 { font-size: 2em; }
+    h2 { font-size: 1.2em; }
 }
