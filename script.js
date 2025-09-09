@@ -91,26 +91,7 @@ function openUploadModal(name, docId) {
 document.querySelector('.close-button').onclick = () => document.getElementById('uploadModal').style.display = 'none';
 window.onclick = (event) => { if (event.target == document.getElementById('uploadModal')) { document.getElementById('uploadModal').style.display = 'none'; } };
 
-
-document.getElementById('addGuestForm').addEventListener('submit', e => {
-    e.preventDefault();
-    const nameInput = document.getElementById('newGuestName'), isChildCheck = document.getElementById('newGuestIsChild');
-    const name = nameInput.value.trim();
-    if (!name) return;
-    const btn = document.getElementById('addGuestBtn'), statusEl = document.getElementById('addGuestStatus');
-    btn.disabled = true; statusEl.textContent = "Adicionando...";
-    const payload = {action: 'addGuest', name: name, isChild: isChildCheck.checked};
-    
-    // CORRIGIDO: Agora usa a constante 'scriptURL'
-    fetch(scriptURL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
-        .then(res => res.json()).then(res => {
-            if (res.status === "success") { statusEl.textContent = res.message; e.target.reset(); } 
-            else { throw new Error(res.message); }
-                .catch(err => {
-                console.error(err);
-                statusEl.textContent = 'Erro: ' + err.message;
-})
-});
+// LÓGICA DO FORMULÁRIO 'ADICIONAR CONVIDADO' FOI REMOVIDA
 
 document.getElementById('submitReceiptBtn').addEventListener('click', () => {
     const fileInput = document.getElementById('receiptFile'), statusEl = document.getElementById('uploadStatus');
