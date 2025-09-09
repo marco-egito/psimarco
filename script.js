@@ -131,7 +131,7 @@ addGuestForm.addEventListener('submit', (e) => {
     addGuestBtn.disabled = true;
     addGuestStatus.textContent = "Adicionando...";
 
-    const scriptURL = "URL_DO_SEU_APP_DA_WEB_AQUI";
+    const scriptURL = "https://script.google.com/macros/s/AKfycbzgoIXEOZopMWYDEJg8Uc_elZIvV-HC54ea_EPEo-wyeJmCWsApZa2JjmEVL6HF1zbX/exec";
     const payload = {
         action: 'addGuest', name: guestName, isChild: newGuestIsChildCheckbox.checked
     };
