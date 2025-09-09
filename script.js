@@ -23,7 +23,7 @@ guestsCollection.orderBy('name').onSnapshot(snapshot => {
     const guestListContainer = document.getElementById('guest-list-container');
     guestListContainer.innerHTML = '';
     
-    // --- LÓGICA DE CÁLCULO ATUALIZADA CONFORME O SEU PEDIDO ---
+    // --- LÓGICA DE CÁLCULO ATUALIZADA CONFORME SEU PEDIDO ---
     const adultosConfirmados = snapshot.docs.filter(doc => doc.data().presence_confirmed && !doc.data().isChild);
     const numeroDePagantes = adultosConfirmados.length > 3 ? adultosConfirmados.length - 3 : 0;
 
@@ -31,11 +31,14 @@ guestsCollection.orderBy('name').onSnapshot(snapshot => {
     const valorEntradaPorPessoa = numeroDePagantes > 0 ? 1500 / numeroDePagantes : 0;
     const valorFinalPorPessoa = numeroDePagantes > 0 ? 500 / numeroDePagantes : 0;
     
-    // Atualiza os textos dos cards de rateio
-    document.getElementById('entry-cost-per-person').innerHTML = `Valor da Entrada (R$ 1.500,00): <strong>${valorEntradaPorPessoa.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</strong> por pessoa`;
-    document.getElementById('final-cost-per-person').innerHTML = `Valor Final (R$ 500,00): <strong>${valorFinalPorPessoa.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</strong> por pessoa`;
+    // ATUALIZAÇÃO 1: Adiciona o número de confirmados e pagantes ao texto.
+    const pagantesTexto = `${numeroDePagantes} pagantes confirmados`;
     
-    // Calcula o valor que ainda falta para a ENTRADA
+    // ATUALIZAÇÃO 2: Altera os textos dos cards de rateio.
+    document.getElementById('entry-cost-per-person').innerHTML = `Valor da Entrada (R$ 1.500,00): <strong>${valorEntradaPorPessoa.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</strong> por pessoa <br><small>(${pagantesTexto})</small>`;
+    document.getElementById('final-cost-per-person').innerHTML = `Valor restante (R$ 500,00): <strong>${valorFinalPorPessoa.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</strong> por pessoa <br><small>(${pagantesTexto})</small>`;
+    
+    // ATUALIZAÇÃO 3: Calcula o valor que ainda falta para a ENTRADA.
     let totalPagoEntrada = 0;
     snapshot.docs.forEach(doc => {
         const guest = doc.data();
