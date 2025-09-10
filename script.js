@@ -78,37 +78,21 @@ function renderGuest(doc) {
     if (guest.paidEntry && guest.paidFinal) {
         actionContent = `<span>✅ Pagamento Completo</span>`;
         //Desativei o check
-   /* } else if (guest.presence_confirmed) {
+    } else if (guest.presence_confirmed) {
         actionContent = `
             <div class="payment-controls">
                 <div class="payment-checkboxes">
                     <div class="payment-option">
-                        <input type="checkbox" id="entry_${doc.id}" ${guest.paidEntry ? 'checked' : ''} onchange="updatePaymentStatus('${doc.id}', 'paidEntry', this.checked)">
+                        <input type="checkbox" id="entry_${doc.id}" ${guest.paidEntry ? 'checked' : ''} disabled> //onchange="updatePaymentStatus('${doc.id}', 'paidEntry', this.checked)">
                         <label for="entry_${doc.id}">Pago Entrada</label>
                     </div>
                     <div class="payment-option">
-                        <input type="checkbox" id="final_${doc.id}" ${guest.paidFinal ? 'checked' : ''} onchange="updatePaymentStatus('${doc.id}', 'paidFinal', this.checked)">
+                        <input type="checkbox" id="final_${doc.id}" ${guest.paidFinal ? 'checked' : ''} disabled> //onchange="updatePaymentStatus('${doc.id}', 'paidFinal', this.checked)">
                         <label for="final_${doc.id}">Pago Final</label>
                     </div>
                 </div>
                 <button class="deconfirm-btn" onclick="togglePresence('${doc.id}', true)">Desconfirmar</button>
-            </div>`;*/
-    }  else if (guest.presence_confirmed) {
-    actionContent = `
-        <div class="payment-controls">
-            <div class="payment-checkboxes">
-                <div class="payment-option">
-                    <input type="checkbox" id="entry_${doc.id}" ${guest.paidEntry ? 'checked' : ''} disabled>
-                    <label for="entry_${doc.id}">Pago Entrada</label>
-                </div>
-                <div class="payment-option">
-                    <input type="checkbox" id="final_${doc.id}" ${guest.paidFinal ? 'checked' : ''} disabled>
-                    <label for="final_${doc.id}">Pago Final</label>
-                </div>
-            </div>
-            <button class="deconfirm-btn" onclick="togglePresence('${doc.id}', true)">Desconfirmar</button>
-        </div>`;
-}
+            </div>`;
 
     } else {
         actionContent = `<button class="presence-btn" onclick="togglePresence('${doc.id}', false)">Confirmar Presença</button>`;
