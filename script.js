@@ -103,7 +103,7 @@ function renderGuest(doc) {
         <div class="guest-info">
             <span>${guest.name}</span>
             <div class="editable-checkbox">
-                <input type="checkbox" id="child_${doc.id}" ${guest.isChild ? 'checked' : ''} onchange="toggleChildStatus('${doc.id}', this.checked)">
+                <input type="checkbox" id="child_${doc.id}" ${guest.isChild ? 'checked' : ''} onchange="toggleChildStatus('${doc.id}', this.checked)" disable>
                 <label for="child_${doc.id}">É criança?</label>
             </div>
         </div>
