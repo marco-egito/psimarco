@@ -87,7 +87,7 @@ function renderGuest(doc) {
                         <label for="entry_${doc.id}">Pago Entrada</label>
                     </div>
                     <div class="payment-option">
-                       <input type="checkbox" id="final_${doc.id}" ${guest.paidFinal ? 'checked' : ''} onchange="updatePaymentStatus('${doc.id}', 'paidFinal', this.checked)">
+                       <input type="checkbox" id="final_${doc.id}" ${guest.paidFinal ? 'checked' : ''} onchange="updatePaymentStatus('${doc.id}', 'paidFinal', this.checked)" disabled>
             
                         <label for="final_${doc.id}">Pago Final</label>
                     </div>
