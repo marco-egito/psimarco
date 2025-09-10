@@ -83,11 +83,13 @@ function renderGuest(doc) {
             <div class="payment-controls">
                 <div class="payment-checkboxes">
                     <div class="payment-option">
-                        <input type="checkbox" id="entry_${doc.id}" ${guest.paidEntry ? 'checked' : ''} disabled> //onchange="updatePaymentStatus('${doc.id}', 'paidEntry', this.checked)">
+                      //  <input type="checkbox" id="entry_${doc.id}" ${guest.paidEntry ? 'checked' : ''} disabled>  onchange="updatePaymentStatus('${doc.id}', 'paidEntry', this.checked)">
+                       <input type="checkbox" id="entry_${doc.id}" ${guest.paidEntry ? 'checked' : ''} disabled>
                         <label for="entry_${doc.id}">Pago Entrada</label>
                     </div>
                     <div class="payment-option">
-                        <input type="checkbox" id="final_${doc.id}" ${guest.paidFinal ? 'checked' : ''} disabled> //onchange="updatePaymentStatus('${doc.id}', 'paidFinal', this.checked)">
+                       // <input type="checkbox" id="final_${doc.id}" ${guest.paidFinal ? 'checked' : ''} disabled>  onchange="updatePaymentStatus('${doc.id}', 'paidFinal', this.checked)">
+                        <input type="checkbox" id="final_${doc.id}" ${guest.paidFinal ? 'checked' : ''} disabled> 
                         <label for="final_${doc.id}">Pago Final</label>
                     </div>
                 </div>
